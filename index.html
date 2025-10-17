@@ -3,99 +3,150 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>App Versions — Dashboard & Endpoint</title>
+  <title>App Versions — Skillerious (Robin Doak)</title>
+  <meta name="description" content="Version dashboard and simple JSON/TXT endpoints for Skillerious — Robin Doak apps.">
   <link rel="alternate" type="application/json" href="?format=json">
   <style>
     :root{
-      --bg:#0b1116;--panel:#0f151c;--muted:#131b24;--muted2:#0f141a;
-      --text:#e8f0fb;--dim:#a9b7c8;--accent:#68d3ff;--accent2:#28c0a0;
-      --ok:#36d27a;--warn:#e8b84a;--beta:#74c3ff;--danger:#ff6b6b;
-      --ring:rgba(255,255,255,.07);--ring-2:rgba(255,255,255,.12);
-      --radius:16px;--shadow:0 12px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.03);
-      --mono:ui-monospace,SFMono-Regular,Consolas,Menlo,Monaco,monospace;
-      --sans:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Noto Sans",Arial;
+      /* easy to tweak */
+      --bg:#0a0f14;         /* canvas */
+      --panel:#0f151c;      /* panel gradient start */
+      --panel2:#0c1218;     /* panel gradient end   */
+      --surface:#121a23;    /* controls */
+      --ring:rgba(255,255,255,.08);
+      --ring-2:rgba(255,255,255,.16);
+      --text:#eaf2ff;
+      --dim:#a8b5c6;
+      --accent:#5ce1ff;     /* primary accent */
+      --accent-2:#2dd4bf;   /* secondary accent */
+      --ok:#42d392;
+      --beta:#74c3ff;
+      --warn:#faba4a;
+      --shadow:0 14px 44px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.03);
+      --radius:16px;
+      --mono:ui-monospace,SFMono-Regular,Consolas,Menlo,monospace;
+      --sans:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Noto Sans",Arial;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;background:
-       radial-gradient(1200px 800px at 10% -10%, #1a2230 0%, transparent 60%) no-repeat,
-       radial-gradient(900px 700px at 120% 10%, #13202b 0%, transparent 60%) no-repeat,
-       var(--bg);
-      color:var(--text);font-family:var(--sans);line-height:1.55;
+      margin:0;
+      background:
+        radial-gradient(1200px 900px at -10% 0%, #14212d 0%, transparent 55%) no-repeat,
+        radial-gradient(1200px 900px at 110% -20%, #0f2030 0%, transparent 55%) no-repeat,
+        var(--bg);
+      color:var(--text);
+      font-family:var(--sans);
+      line-height:1.55;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
     .page{min-height:100vh;display:flex;flex-direction:column}
-    header.top{
-      padding:28px 24px 12px;display:grid;grid-template-columns:1fr auto;gap:16px;
-      align-items:center
-    }
-    .title-wrap{display:flex;align-items:center;gap:14px;min-width:0}
-    h1{margin:0;font-size:30px;letter-spacing:.2px}
-    .badge{
-      white-space:nowrap;
-      font-size:12px;padding:7px 10px;border-radius:999px;background:var(--muted);
-      color:var(--dim);border:1px solid var(--ring)
-    }
-    .schema{justify-self:end}
-    .schema .chip{
-      padding:7px 12px;border-radius:999px;background:rgba(104,211,255,.14);
-      color:#cfeeff;border:1px solid rgba(104,211,255,.28);font-size:12px
-    }
 
-    .main{flex:1;display:grid;grid-template-rows:auto 1fr;gap:14px;padding:10px 24px 24px;min-height:0}
+    /* ===== Header / Brand ===== */
+    .top{
+      padding:22px 20px 10px;
+      display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;
+    }
+    .brand{
+      display:flex;align-items:center;gap:14px;min-width:0;
+    }
+    .logo{
+      width:42px;height:42px;border-radius:50%;
+      background:
+        radial-gradient(120% 120% at 20% 20%, #5ce1ff 0%, rgba(92,225,255,.4) 40%, transparent 70%),
+        radial-gradient(120% 120% at 80% 80%, #2dd4bf 0%, transparent 65%),
+        linear-gradient(135deg, #0e1c25, #0a141b);
+      border:1px solid var(--ring);
+      box-shadow:0 0 0 4px rgba(92,225,255,.05);
+      display:grid;place-items:center;font-weight:800;letter-spacing:.2px;color:#eaffff;
+    }
+    .logo span{font-size:14px}
+    h1{margin:0;font-size:28px;letter-spacing:.2px}
+    .owner{
+      color:var(--dim);font-size:13px;margin-top:2px
+    }
+    .owner strong{color:#cfe9ff}
+    .owner .sep{opacity:.3;margin:0 .35rem}
+    .schema{justify-self:end}
+    .chip{
+      padding:7px 12px;border-radius:999px;background:rgba(92,225,255,.14);
+      color:#cfefff;border:1px solid rgba(92,225,255,.28);font-size:12px;white-space:nowrap
+    }
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      background:var(--surface);border:1px solid var(--ring);
+      padding:7px 10px;border-radius:999px;color:var(--dim);font-size:12px;white-space:nowrap
+    }
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px rgba(92,225,255,.16)}
+
+    /* ===== Main ===== */
+    .main{flex:1;display:grid;grid-template-rows:auto 1fr;gap:14px;padding:8px 20px 24px;min-height:0}
     .toolbar{
-      display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:linear-gradient(180deg,var(--panel),var(--muted2));
-      border:1px solid var(--ring);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px 12px 12px 14px
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--ring);border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:12px 12px 12px 14px
     }
     .toolbar .spacer{flex:1}
-    input[type="search"], select{
-      background:var(--muted);color:var(--text);border:1px solid var(--ring);
-      border-radius:10px;padding:10px 12px;outline:none;min-width:180px
+    .input, select, .btn{
+      background:var(--surface);color:var(--text);border:1px solid var(--ring);
+      border-radius:12px;padding:10px 12px;outline:none
     }
+    .input{min-width:200px}
     .btn{
-      appearance:none;border:1px solid var(--ring);
-      background:linear-gradient(180deg,#1b2330,#121821);
-      color:var(--text);padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600
+      appearance:none;cursor:pointer;font-weight:650;
+      background:
+        linear-gradient(180deg,#1b2330,#121821);
     }
     .btn:hover{border-color:var(--ring-2)}
+    .btn.ok{
+      background:linear-gradient(180deg,#13281c,#0f1a13);
+      border-color:rgba(66,211,146,.36)
+    }
     .btn.ghost{background:transparent}
-    .btn.ok{background:linear-gradient(180deg,#13251b,#0f1a13);border-color:rgba(54,210,122,.35)}
 
     .content{display:grid;grid-template-rows:auto 1fr;gap:14px;min-height:0}
+
+    /* ===== Cards ===== */
     .cards{
       display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
       gap:14px
     }
     .card{
-      background:linear-gradient(180deg,var(--panel),var(--muted2));
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
       border:1px solid var(--ring);border-radius:14px;box-shadow:var(--shadow);
       padding:14px;display:grid;gap:8px
     }
     .card h3{margin:0 0 6px 0;overflow:hidden;text-overflow:ellipsis}
     .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13px}
     .kv .k{color:var(--dim)}
-    .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--ring);font-size:12px}
-    .pill.ok{background:rgba(54,210,122,.12);color:#bff3d4;border-color:rgba(54,210,122,.28)}
+    .pill{
+      display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
+      border:1px solid var(--ring);font-size:12px
+    }
+    .pill.ok{background:rgba(66,211,146,.12);color:#cfeedd;border-color:rgba(66,211,146,.28)}
     .pill.beta{background:rgba(116,195,255,.12);color:#d8ecff;border-color:rgba(116,195,255,.28)}
     .mono{font-family:var(--mono)}
     .links a{color:var(--accent);text-decoration:none}
     .links a:hover{text-decoration:underline}
 
+    /* ===== Table Panel ===== */
     .panel{
-      background:linear-gradient(180deg,var(--panel),var(--muted2));
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
       border:1px solid var(--ring);border-radius:var(--radius);box-shadow:var(--shadow);
       display:grid;grid-template-rows:auto 1fr auto;min-height:0
     }
     .head{padding:12px 16px;border-bottom:1px solid var(--ring)}
     .tray{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     .endpoint{
-      background:var(--muted);border:1px solid var(--ring);border-radius:10px;
+      background:var(--surface);border:1px solid var(--ring);border-radius:10px;
       padding:10px 12px;font-family:var(--mono);color:var(--dim);font-size:12px;overflow:auto
     }
     .scroll{overflow:auto;min-height:0}
     table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
     thead th{
-      position:sticky;top:0;background:linear-gradient(180deg,var(--panel),var(--muted2));
+      position:sticky;top:0;background:linear-gradient(180deg,var(--panel),var(--panel2));
       text-align:left;padding:14px 16px;color:var(--dim);font-weight:600;border-bottom:1px solid var(--ring);z-index:1
     }
     tbody td{padding:14px 16px;border-bottom:1px solid var(--ring)}
@@ -103,22 +154,25 @@
     .id{font-family:var(--mono);color:var(--dim)}
     .foot{padding:12px 16px;color:var(--dim);border-top:1px dashed var(--ring);font-size:12px}
 
-    pre.json-out{margin:0;padding:20px;background:#0c0f13;color:#e6f1ff;font-family:var(--mono);font-size:13px}
+    /* Raw outputs */
+    pre.json-out{
+      margin:0;padding:20px;background:#0c0f13;color:#e6f1ff;font-family:var(--mono);font-size:13px
+    }
 
     /* ===== Mobile polish ===== */
     @media (max-width: 900px){
-      header.top{grid-template-columns:1fr;gap:10px}
+      .top{grid-template-columns:1fr;gap:10px;padding:18px 14px 8px}
       .schema{justify-self:start}
-      .main{padding:10px 14px 18px}
+      .main{padding:8px 14px 18px}
       .toolbar{gap:8px}
       .toolbar > *{flex:1 1 100%}
-      input[type="search"],select,.btn{min-width:0}
+      .input{min-width:0}
       .cards{grid-template-columns:1fr}
-      /* Turn table rows into labeled blocks */
+      /* Table -> blocks */
       thead{display:none}
       table, tbody, tr, td{display:block;width:100%}
       tbody tr{border-top:1px solid var(--ring);padding:10px 12px}
-      tbody td{border:0;padding:6px 0;display:grid;grid-template-columns:110px 1fr;gap:4px 10px}
+      tbody td{border:0;padding:6px 0;display:grid;grid-template-columns:108px 1fr;gap:4px 10px}
       tbody td::before{content:attr(data-label);color:var(--dim);font-size:12px}
       .scroll{padding:0 2px}
     }
@@ -126,17 +180,26 @@
 </head>
 <body>
 <div class="page">
+  <!-- ===== Brand Header ===== -->
   <header class="top">
-    <div class="title-wrap">
-      <h1>App Versions</h1>
-      <span class="badge" id="updated-badge">Loading…</span>
+    <div class="brand">
+      <div class="logo" aria-hidden="true"><span>SR</span></div>
+      <div>
+        <h1>App Versions</h1>
+        <div class="owner">
+          <span class="badge"><span class="dot"></span> <span id="updated-badge">Updated…</span></span>
+          <span class="sep">•</span>
+          <strong>Skillerious</strong> — Robin Doak
+        </div>
+      </div>
     </div>
     <div class="schema"><span class="chip">schema v<span id="schema-ver">2</span></span></div>
   </header>
 
+  <!-- ===== Main ===== -->
   <main class="main">
     <div class="toolbar" role="region" aria-label="Filters">
-      <input id="q" type="search" placeholder="Search apps…" aria-label="Search apps">
+      <input id="q" class="input" type="search" placeholder="Search apps…" aria-label="Search apps">
       <select id="track">
         <option value="all">All tracks</option>
         <option value="stable" selected>Stable</option>
@@ -189,39 +252,24 @@
         </div>
 
         <div class="foot">
-          <strong>How to compare in your app</strong> — keep an integer <code class="mono">version_code</code> locally.
-          Fetch an endpoint and compare to remote <code class="mono">code</code>. If remote &gt; local → prompt update.
-          Quick endpoint: <code class="mono">?format=code&amp;app=&lt;id&gt;</code> (returns just the integer).
+          <strong>How to compare in your app</strong> — store an integer <code class="mono">version_code</code> locally.
+          Fetch <code class="mono">?format=code&amp;app=&lt;id&gt;</code> to get just the integer remote code.  
+          If remote &gt; local → prompt update. Need full data? Use <code class="mono">?format=json&amp;app=&lt;id&gt;</code>.
         </div>
       </section>
     </section>
   </main>
 </div>
 
-<!-- ========= DATA (VALID JSON; NO COMMENTS) ========= -->
+<!-- =================== DATA (VALID JSON; NO COMMENTS) =================== -->
 <script id="versions-data" type="application/json">
 {
   "schemaVersion": 2,
-  "generated": "2025-10-17T14:10:00Z",
-  "contact": "Robin Doak (@skillerious)",
+  "generated": "2025-10-17T14:20:00Z",
+  "contact": "Skillerious — Robin Doak",
   "apps": [
     {
-      "id": "version-tracker",
-      "name": "Version-Tracker",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Version-Tracker/releases",
-          "download": "https://github.com/skillerious/Version-Tracker/releases/latest",
-          "notes": "Repo for this versions dashboard."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "torntargettracker",
+      "id": "target-tracker",
       "name": "TornTargetTracker",
       "tracks": {
         "stable": {
@@ -545,14 +593,14 @@
   ]
 }
 </script>
-<!-- ========= END DATA ========= -->
+<!-- =================== END DATA =================== -->
 
 <script>
 (function(){
   const $ = (s, r=document)=>r.querySelector(s);
   const qs = new URLSearchParams(location.search);
 
-  /* ===== Parse JSON safely ===== */
+  /* ----- Parse JSON safely ----- */
   let data;
   try { data = JSON.parse($("#versions-data").textContent.trim()); }
   catch(e){
@@ -560,19 +608,18 @@
     document.title="versions.json"; return;
   }
 
-  /* ===== Machine-readable endpoints ===== */
+  /* ----- Machine-friendly endpoints ----- */
   const format = (qs.get("format")||"").toLowerCase();
   if (format){
     const appId = qs.get("app");
     const trackKey = (qs.get("track")||"stable").toLowerCase();
     const latestOnly = qs.get("latest")==="1";
     const apps = data.apps||[];
-
     const pickLatest = (app)=> app.tracks && (app.tracks[trackKey] || app.tracks.stable) || null;
 
     if (format === "code"){
       if (!appId){
-        const lines = apps.map(a => `${a.id}=${(pickLatest(a)?.code ?? 0)}`).join("\\n");
+        const lines = apps.map(a => `${a.id}=${(pickLatest(a)?.code ?? 0)}`).join("\n");
         document.body.innerHTML = '<pre class="json-out">'+lines+'</pre>'; document.title="versions.txt"; return;
       } else {
         const app = apps.find(a=>a.id===appId);
@@ -592,7 +639,7 @@ version=${L.version??""}
 code=${L.code??0}
 date=${L.date??""}
 url=${L.url??""}
-download=${L.download??""}\\n`;
+download=${L.download??""}\n`;
         }
         return `app=${app.id}
 name=${app.name||app.id}
@@ -601,18 +648,18 @@ version=${L.version??""}
 code=${L.code??0}
 date=${L.date??""}
 url=${L.url??""}
-download=${L.download??""}\\n`;
+download=${L.download??""}\n`;
       };
       if (appId){
         const app = apps.find(a=>a.id===appId);
-        const out = app ? block(app) : `error=app_not_found\\napp=${appId}\\n`;
+        const out = app ? block(app) : `error=app_not_found\napp=${appId}\n`;
         document.body.innerHTML = '<pre class="json-out">'+out+'</pre>'; document.title=`${appId}.${format}`; return;
       }
       if (latestOnly){
-        const out = apps.map(a=>`${a.id} ${(pickLatest(a)?.code??0)} ${(pickLatest(a)?.version??"")}`).join("\\n");
+        const out = apps.map(a=>`${a.id} ${(pickLatest(a)?.code??0)} ${(pickLatest(a)?.version??"")}`).join("\n");
         document.body.innerHTML = '<pre class="json-out">'+out+'</pre>'; document.title="latest.txt"; return;
       }
-      const out = apps.map(block).join("\\n");
+      const out = apps.map(block).join("\n");
       document.body.innerHTML = '<pre class="json-out">'+out+'</pre>'; document.title=`versions.${format}`; return;
     }
 
@@ -638,9 +685,9 @@ download=${L.download??""}\\n`;
     }
   }
 
-  /* ===== Interactive UI ===== */
+  /* ----- Interactive UI ----- */
   const updated = $("#updated-badge");
-  updated.textContent = (()=>{ try{ const dt=new Date(data.generated); if(!isNaN(dt)) return "UPDATED "+dt.toISOString().replace("T"," ").replace("Z"," UTC"); }catch{} return "Updated: "+(data.generated||"–") })();
+  updated.textContent = (()=>{ try{ const dt=new Date(data.generated); if(!isNaN(dt)) return dt.toISOString().replace("T"," ").replace("Z"," UTC"); }catch{} return (data.generated||"–") })();
   $("#schema-ver").textContent = String(data.schemaVersion||"2");
 
   const qInput=$("#q"), trackSel=$("#track"), sortSel=$("#sort"), denseBtn=$("#toggle-density");
@@ -727,7 +774,6 @@ download=${L.download??""}\\n`;
         {label:"Date", html:(r.latest.date??"—"), cls:""},
         {label:"Links", html:((r.latest.url? `<a href="${r.latest.url}" target="_blank" rel="noopener">release</a>`:"") + (r.latest.download? ` · <a href="${r.latest.download}" target="_blank" rel="noopener">download</a>`:"") + (r.latest.notes? ` · <span title="${r.latest.notes}">notes</span>`:"")), cls:"links"}
       ];
-
       for (const c of cells){
         const td=document.createElement("td");
         td.setAttribute("data-label", c.label);
@@ -772,6 +818,9 @@ download=${L.download??""}\\n`;
   $("#track").addEventListener("change", build);
   $("#sort").addEventListener("change", build);
 
+  // Set header timestamp / build UI
+  const b = $("#updated-badge");
+  b.textContent = b.textContent.replace("Updated…", "");
   build();
 })();
 </script>
