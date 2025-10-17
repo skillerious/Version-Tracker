@@ -1,0 +1,329 @@
+{
+  "schemaVersion": 2,
+  "generated": "2025-10-17T15:00:00Z",
+  "contact": "Skillerious — Robin Doak",
+  "apps": [
+    {
+      "id": "target-tracker",
+      "name": "TornTargetTracker",
+      "tracks": {
+        "stable": {
+          "version": "2.6.1",
+          "code": 20601,
+          "date": "2025-10-16",
+          "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.1",
+          "download": "https://github.com/skillerious/TornTargetTracker/releases/download/V2.6.1/Target.Tracker.Installer.exe",
+          "notes": "Settings dialog redesign, status color upgrades, fixes."
+        }
+      },
+      "history": [
+        {
+          "version": "2.6.0",
+          "code": 20600,
+          "date": "2025-10-14",
+          "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.0"
+        }
+      ]
+    },
+    {
+      "id": "swift-image-uploader",
+      "name": "Swift-Image-Uploader",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/Swift-Image-Uploader/releases",
+          "download": "https://github.com/skillerious/Swift-Image-Uploader/releases/latest",
+          "notes": "Utilizes GitHub repo/token to host and manage images."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "swiftformatter",
+      "name": "SwiftFormatter",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/SwiftFormatter/releases",
+          "download": "https://github.com/skillerious/SwiftFormatter/releases/latest",
+          "notes": "Professional USB drive formatter."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "loopback-recorder",
+      "name": "Loopback-Recorder",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/Loopback-Recorder/releases",
+          "download": "https://github.com/skillerious/Loopback-Recorder/releases/latest",
+          "notes": "Record Windows system audio."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "starfield-iddb",
+      "name": "Starfield-IDDB",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/Starfield-IDDB/releases",
+          "download": "https://github.com/skillerious/Starfield-IDDB/releases/latest",
+          "notes": "Console command database + JSON editor."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "cleanname",
+      "name": "CleanName",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/CleanName/releases",
+          "download": "https://github.com/skillerious/CleanName/releases/latest",
+          "notes": "File re-namer with loads of features."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "modninja",
+      "name": "ModNinja",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/ModNinja/releases",
+          "download": "https://github.com/skillerious/ModNinja/releases/latest",
+          "notes": "View and export Vortex mod lists."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "website",
+      "name": "Website",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/Website/releases",
+          "download": "https://github.com/skillerious/Website/releases/latest",
+          "notes": "Markiva marketing site."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "ytaudio",
+      "name": "YTAudio",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/YTAudio/releases",
+          "download": "https://github.com/skillerious/YTAudio/releases/latest",
+          "notes": "Download audio from YouTube URLs."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "markiva",
+      "name": "Markiva",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/Markiva/releases",
+          "download": "https://github.com/skillerious/Markiva/releases/latest",
+          "notes": "Dark-themed, offline-first Markdown editor."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "falloutsheltersge",
+      "name": "FalloutShelterSGE",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/FalloutShelterSGE/releases",
+          "download": "https://github.com/skillerious/FalloutShelterSGE/releases/latest",
+          "notes": "Save file editor for Fallout Shelter."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "robindoak",
+      "name": "RobinDoak",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/RobinDoak/releases",
+          "download": "https://github.com/skillerious/RobinDoak/releases/latest",
+          "notes": "Personal site repo."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "swifthelp",
+      "name": "SwiftHelp",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/SwiftHelp/releases",
+          "download": "https://github.com/skillerious/SwiftHelp/releases/latest",
+          "notes": "Electron-based help-authoring tool."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "webdownloader",
+      "name": "WebDownloader",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/WebDownloader/releases",
+          "download": "https://github.com/skillerious/WebDownloader/releases/latest",
+          "notes": "Website downloading tool."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "tornchainer",
+      "name": "TornChainer",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/TornChainer/releases",
+          "download": "https://github.com/skillerious/TornChainer/releases/latest",
+          "notes": "Store chaining targets for Torn."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "swiftsfv",
+      "name": "SwiftSFV",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/SwiftSFV/releases",
+          "download": "https://github.com/skillerious/SwiftSFV/releases/latest",
+          "notes": "File verification utility."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "github-follower-tracker",
+      "name": "Github-Follower-Tracker",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/Github-Follower-Tracker/releases",
+          "download": "https://github.com/skillerious/Github-Follower-Tracker/releases/latest",
+          "notes": "Follower tracking and analytics."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "skillerious",
+      "name": "skillerious",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/skillerious/releases",
+          "download": "https://github.com/skillerious/skillerious/releases/latest",
+          "notes": "Profile repo."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "age-converter-torn",
+      "name": "Age-Converter-Torn-",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/Age-Converter-Torn-/releases",
+          "download": "https://github.com/skillerious/Age-Converter-Torn-/releases/latest",
+          "notes": "Userscript to convert Torn age in days."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "fixelate-pro",
+      "name": "Fixelate-Pro",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/Fixelate-Pro/releases",
+          "download": "https://github.com/skillerious/Fixelate-Pro/releases/latest",
+          "notes": "All-round image editor."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "snk",
+      "name": "snk (fork)",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/snk/releases",
+          "download": "https://github.com/skillerious/snk/releases/latest",
+          "notes": "Fork of Platane/snk."
+        }
+      },
+      "history": []
+    }
+  ]
+}
