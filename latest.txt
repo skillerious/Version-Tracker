@@ -1,5 +1,5 @@
 target-tracker 20601 2.6.1
-swift-image-uploader 0 
+swift-image-uploader 0 2.8.8
 swiftformatter 0 
 loopback-recorder 0 
 starfield-iddb 0 
