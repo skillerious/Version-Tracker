@@ -4,25 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>App Versions — Skillerious (Robin Doak)</title>
-  <meta name="description" content="Version dashboard and simple JSON/TXT endpoints for Skillerious — Robin Doak apps.">
-  <link rel="alternate" type="application/json" href="?format=json">
+  <meta name="description" content="Version dashboard & machine-readable endpoints for Skillerious — Robin Doak apps." />
+  <link rel="alternate" type="application/json" href="?format=json" />
   <style>
     :root{
-      /* easy to tweak */
-      --bg:#0a0f14;         /* canvas */
-      --panel:#0f151c;      /* panel gradient start */
-      --panel2:#0c1218;     /* panel gradient end   */
-      --surface:#121a23;    /* controls */
-      --ring:rgba(255,255,255,.08);
-      --ring-2:rgba(255,255,255,.16);
-      --text:#eaf2ff;
-      --dim:#a8b5c6;
-      --accent:#5ce1ff;     /* primary accent */
-      --accent-2:#2dd4bf;   /* secondary accent */
-      --ok:#42d392;
-      --beta:#74c3ff;
-      --warn:#faba4a;
-      --shadow:0 14px 44px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.03);
+      --bg:#0a0f14;
+      --panel:#0f151c; --panel2:#0c1218;
+      --surface:#121a23;
+      --ring:rgba(255,255,255,.08); --ring-2:rgba(255,255,255,.18);
+      --text:#eaf2ff; --dim:#a8b5c6;
+      --accent:#5ce1ff; --accent-2:#2dd4bf;
+      --ok:#42d392; --beta:#74c3ff; --warn:#faba4a;
+      --shadow:0 16px 46px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.03);
       --radius:16px;
       --mono:ui-monospace,SFMono-Regular,Consolas,Menlo,monospace;
       --sans:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Noto Sans",Arial;
@@ -35,53 +28,54 @@
         radial-gradient(1200px 900px at -10% 0%, #14212d 0%, transparent 55%) no-repeat,
         radial-gradient(1200px 900px at 110% -20%, #0f2030 0%, transparent 55%) no-repeat,
         var(--bg);
-      color:var(--text);
-      font-family:var(--sans);
-      line-height:1.55;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
+      color:var(--text); font-family:var(--sans); line-height:1.55;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
     .page{min-height:100vh;display:flex;flex-direction:column}
 
-    /* ===== Header / Brand ===== */
+    /* ===== Header / Branding ===== */
     .top{
-      padding:22px 20px 10px;
-      display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;
+      padding:22px 20px 8px;
+      display:grid; grid-template-columns:1fr auto; gap:16px; align-items:center;
     }
     .brand{
-      display:flex;align-items:center;gap:14px;min-width:0;
+      display:flex; align-items:center; gap:14px; min-width:0;
     }
-    .logo{
-      width:42px;height:42px;border-radius:50%;
-      background:
-        radial-gradient(120% 120% at 20% 20%, #5ce1ff 0%, rgba(92,225,255,.4) 40%, transparent 70%),
-        radial-gradient(120% 120% at 80% 80%, #2dd4bf 0%, transparent 65%),
-        linear-gradient(135deg, #0e1c25, #0a141b);
-      border:1px solid var(--ring);
-      box-shadow:0 0 0 4px rgba(92,225,255,.05);
-      display:grid;place-items:center;font-weight:800;letter-spacing:.2px;color:#eaffff;
+    .brand .logo{
+      width:48px;height:48px;border-radius:12px;
+      background:linear-gradient(135deg,#0e1c25,#0a141b);
+      border:1px solid var(--ring); box-shadow:0 0 0 4px rgba(92,225,255,.06);
+      overflow:hidden; display:grid; place-items:center;
     }
-    .logo span{font-size:14px}
-    h1{margin:0;font-size:28px;letter-spacing:.2px}
-    .owner{
-      color:var(--dim);font-size:13px;margin-top:2px
+    .brand .logo img{width:100%;height:100%;object-fit:cover;display:block}
+    .brand h1{margin:0;font-size:26px;letter-spacing:.2px}
+    .ownerline{
+      margin-top:2px; display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+      color:var(--dim); font-size:13px;
     }
-    .owner strong{color:#cfe9ff}
-    .owner .sep{opacity:.3;margin:0 .35rem}
-    .schema{justify-self:end}
-    .chip{
-      padding:7px 12px;border-radius:999px;background:rgba(92,225,255,.14);
-      color:#cfefff;border:1px solid rgba(92,225,255,.28);font-size:12px;white-space:nowrap
+    .owner-tag{
+      display:inline-flex; align-items:center; gap:10px; padding:6px 10px; border-radius:999px;
+      background:var(--surface); border:1px solid var(--ring);
     }
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      background:var(--surface);border:1px solid var(--ring);
-      padding:7px 10px;border-radius:999px;color:var(--dim);font-size:12px;white-space:nowrap
+    .owner-name{font-weight:700; color:#d6edff}
+    .updated-pill{
+      display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
+      background:var(--surface); border:1px solid var(--ring); color:var(--dim);
     }
     .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px rgba(92,225,255,.16)}
+    .schema{
+      justify-self:end;
+      display:flex; gap:10px; align-items:center;
+    }
+    .schema .chip{
+      padding:7px 12px;border-radius:999px;white-space:nowrap;
+      background:linear-gradient(180deg,rgba(92,225,255,.16),rgba(92,225,255,.1));
+      border:1px solid rgba(92,225,255,.28); color:#e7fbff; font-size:12px; font-weight:600;
+    }
+    .schema .chip small{color:#c8e8ff; opacity:.9}
 
-    /* ===== Main ===== */
-    .main{flex:1;display:grid;grid-template-rows:auto 1fr;gap:14px;padding:8px 20px 24px;min-height:0}
+    /* ===== Toolbar ===== */
+    .main{flex:1;display:grid;grid-template-rows:auto auto 1fr;gap:14px;padding:8px 20px 24px;min-height:0}
     .toolbar{
       display:flex;flex-wrap:wrap;gap:10px;align-items:center;
       background:linear-gradient(180deg,var(--panel),var(--panel2));
@@ -96,54 +90,38 @@
     .input{min-width:200px}
     .btn{
       appearance:none;cursor:pointer;font-weight:650;
-      background:
-        linear-gradient(180deg,#1b2330,#121821);
+      background:linear-gradient(180deg,#1b2330,#121821);
     }
     .btn:hover{border-color:var(--ring-2)}
-    .btn.ok{
-      background:linear-gradient(180deg,#13281c,#0f1a13);
-      border-color:rgba(66,211,146,.36)
-    }
+    .btn.ok{background:linear-gradient(180deg,#13281c,#0f1a13);border-color:rgba(66,211,146,.36)}
     .btn.ghost{background:transparent}
 
-    .content{display:grid;grid-template-rows:auto 1fr;gap:14px;min-height:0}
-
-    /* ===== Cards ===== */
-    .cards{
-      display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-      gap:14px
-    }
-    .card{
+    /* ===== Endpoints panel ===== */
+    .endpoints{
       background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--ring);border-radius:14px;box-shadow:var(--shadow);
-      padding:14px;display:grid;gap:8px
+      border:1px solid var(--ring); border-radius:var(--radius); box-shadow:var(--shadow);
+      padding:12px 12px 14px; display:grid; gap:10px;
     }
-    .card h3{margin:0 0 6px 0;overflow:hidden;text-overflow:ellipsis}
-    .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13px}
-    .kv .k{color:var(--dim)}
-    .pill{
-      display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
-      border:1px solid var(--ring);font-size:12px
+    .ep-row{display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center}
+    .ep-label{color:var(--dim); font-size:12px}
+    .ep-code{
+      font-family:var(--mono); font-size:13px; color:#cff2ff; background:var(--surface);
+      border:1px solid var(--ring); border-radius:10px; padding:10px 12px; overflow:auto
     }
-    .pill.ok{background:rgba(66,211,146,.12);color:#cfeedd;border-color:rgba(66,211,146,.28)}
-    .pill.beta{background:rgba(116,195,255,.12);color:#d8ecff;border-color:rgba(116,195,255,.28)}
-    .mono{font-family:var(--mono)}
-    .links a{color:var(--accent);text-decoration:none}
-    .links a:hover{text-decoration:underline}
+    .ep-actions{display:flex; gap:8px}
+    .ep-actions .btn{padding:8px 10px; font-size:12px}
+    .ep-controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .ep-controls select{min-width:180px}
+    .ep-hint{color:var(--dim); font-size:12px}
 
-    /* ===== Table Panel ===== */
-    .panel{
+    /* ===== Table (desktop) ===== */
+    .table-wrap{
       background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--ring);border-radius:var(--radius);box-shadow:var(--shadow);
-      display:grid;grid-template-rows:auto 1fr auto;min-height:0
+      border:1px solid var(--ring); border-radius:var(--radius); box-shadow:var(--shadow);
+      display:grid; grid-template-rows:auto 1fr; min-height:0;
     }
-    .head{padding:12px 16px;border-bottom:1px solid var(--ring)}
-    .tray{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-    .endpoint{
-      background:var(--surface);border:1px solid var(--ring);border-radius:10px;
-      padding:10px 12px;font-family:var(--mono);color:var(--dim);font-size:12px;overflow:auto
-    }
-    .scroll{overflow:auto;min-height:0}
+    .table-head{padding:12px 16px;border-bottom:1px solid var(--ring); color:var(--dim); font-size:13px}
+    .scroll{overflow:auto; min-height:0}
     table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
     thead th{
       position:sticky;top:0;background:linear-gradient(180deg,var(--panel),var(--panel2));
@@ -152,52 +130,78 @@
     tbody td{padding:14px 16px;border-bottom:1px solid var(--ring)}
     tbody tr:hover td{background:rgba(255,255,255,.02)}
     .id{font-family:var(--mono);color:var(--dim)}
-    .foot{padding:12px 16px;color:var(--dim);border-top:1px dashed var(--ring);font-size:12px}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--ring);font-size:12px}
+    .pill.ok{background:rgba(66,211,146,.12);color:#cfeedd;border-color:rgba(66,211,146,.28)}
+    .pill.beta{background:rgba(116,195,255,.12);color:#d8ecff;border-color:rgba(116,195,255,.28)}
+    .links a{color:var(--accent);text-decoration:none}
+    .links a:hover{text-decoration:underline}
 
-    /* Raw outputs */
-    pre.json-out{
-      margin:0;padding:20px;background:#0c0f13;color:#e6f1ff;font-family:var(--mono);font-size:13px
+    /* ===== Mobile LIST with expandable rows ===== */
+    .m-list{display:none}
+    .m-item{
+      list-style:none; background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--ring); border-radius:14px; box-shadow:var(--shadow);
+      padding:12px; display:grid; gap:10px;
     }
+    .m-top{
+      display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:center;
+    }
+    .m-icon{width:44px;height:44px;border-radius:10px;overflow:hidden;border:1px solid var(--ring); background:#0e1620}
+    .m-icon img{width:100%;height:100%;object-fit:cover;display:block}
+    .m-title{min-width:0}
+    .m-name{font-weight:800; font-size:16px; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .m-sub{display:flex; gap:8px; align-items:center; margin-top:2px; color:var(--dim); font-size:12px}
+    .m-code{font-family:var(--mono); font-weight:800; letter-spacing:.3px; padding:4px 8px; border-radius:8px; background:rgba(92,225,255,.10); border:1px solid rgba(92,225,255,.25); color:#d8f6ff}
+    .m-ver{font-family:var(--mono)}
+    .chev{
+      width:36px;height:36px;border-radius:999px;border:1px solid var(--ring);
+      display:grid;place-items:center;background:var(--surface);cursor:pointer
+    }
+    .chev svg{transition:transform .18s ease}
+    .m-item[aria-expanded="true"] .chev svg{transform:rotate(180deg)}
+    .m-details{display:none}
+    .m-item[aria-expanded="true"] .m-details{display:block}
+    .m-grid{display:grid; grid-template-columns:110px 1fr; gap:6px 12px; font-size:13px}
+    .m-label{color:var(--dim)}
+    .m-actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+    .btn-mini{display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:6px 10px; border-radius:999px; border:1px solid var(--ring); background:var(--surface); color:var(--text); cursor:pointer}
+    .m-divider{height:1px;background:var(--ring); margin:8px 0}
 
-    /* ===== Mobile polish ===== */
+    /* ===== Responsive rules ===== */
     @media (max-width: 900px){
-      .top{grid-template-columns:1fr;gap:10px;padding:18px 14px 8px}
+      .top{grid-template-columns:1fr; gap:8px; padding:18px 14px 6px}
       .schema{justify-self:start}
       .main{padding:8px 14px 18px}
       .toolbar{gap:8px}
       .toolbar > *{flex:1 1 100%}
       .input{min-width:0}
-      .cards{grid-template-columns:1fr}
-      /* Table -> blocks */
-      thead{display:none}
-      table, tbody, tr, td{display:block;width:100%}
-      tbody tr{border-top:1px solid var(--ring);padding:10px 12px}
-      tbody td{border:0;padding:6px 0;display:grid;grid-template-columns:108px 1fr;gap:4px 10px}
-      tbody td::before{content:attr(data-label);color:var(--dim);font-size:12px}
-      .scroll{padding:0 2px}
+      .table-wrap{display:none}
+      .m-list{display:grid; gap:12px}
     }
   </style>
 </head>
 <body>
 <div class="page">
-  <!-- ===== Brand Header ===== -->
+  <!-- ===== Header ===== -->
   <header class="top">
     <div class="brand">
-      <div class="logo" aria-hidden="true"><span>SR</span></div>
+      <div class="logo"><img src="assets/icon.png" alt="Skillerious icon"></div>
       <div>
         <h1>App Versions</h1>
-        <div class="owner">
-          <span class="badge"><span class="dot"></span> <span id="updated-badge">Updated…</span></span>
-          <span class="sep">•</span>
-          <strong>Skillerious</strong> — Robin Doak
+        <div class="ownerline">
+          <span class="owner-tag"><span class="owner-name">Skillerious</span> — <span>Robin Doak</span></span>
+          <span class="updated-pill"><span class="dot"></span><span id="updated-badge">Updated…</span></span>
         </div>
       </div>
     </div>
-    <div class="schema"><span class="chip">schema v<span id="schema-ver">2</span></span></div>
+    <div class="schema">
+      <span class="chip">Schema <strong>v<span id="schema-ver">2</span></strong> <small>• JSON / TXT / INI / CODE</small></span>
+    </div>
   </header>
 
   <!-- ===== Main ===== -->
   <main class="main">
+    <!-- Controls -->
     <div class="toolbar" role="region" aria-label="Filters">
       <input id="q" class="input" type="search" placeholder="Search apps…" aria-label="Search apps">
       <select id="track">
@@ -211,53 +215,79 @@
         <option value="name_asc">Name A–Z</option>
         <option value="name_desc">Name Z–A</option>
       </select>
-      <button class="btn ghost" id="toggle-density" title="Toggle dense rows">Dense</button>
       <div class="spacer"></div>
       <button class="btn" id="btn-copy-json">Copy JSON URL</button>
       <button class="btn ok" id="btn-download-json">Download JSON</button>
     </div>
 
-    <section class="content">
-      <!-- Summary cards (latest per app / preferred track) -->
-      <div class="cards" id="cards"></div>
+    <!-- Endpoints (beautiful & copyable) -->
+    <section class="endpoints">
+      <div class="ep-controls">
+        <span class="ep-label">Select app for examples:</span>
+        <select id="ep-app"></select>
+        <span class="ep-hint">Copy any endpoint or open with one tap.</span>
+      </div>
 
-      <!-- Full table -->
-      <section class="panel" aria-label="Versions table">
-        <div class="head">
-          <div class="tray">
-            <span class="dim">Endpoints:</span>
-            <div class="endpoint" id="ep-all">./index.html?format=json</div>
-            <div class="endpoint" id="ep-compact">./index.html?format=json&latest=1</div>
-            <div class="endpoint" id="ep-one">./index.html?format=json&app=target-tracker</div>
-            <div class="endpoint" id="ep-code">./index.html?format=code&app=target-tracker</div>
-            <button class="btn ghost" id="btn-copy-curl" title="Copy curl command">Copy curl</button>
-          </div>
+      <div class="ep-row">
+        <div class="ep-code" id="ep-all">./index.html?format=json</div>
+        <div class="ep-actions">
+          <button class="btn" data-ep-copy="#ep-all">Copy</button>
+          <a class="btn ghost" target="_blank" rel="noopener" id="ep-all-open">Open</a>
         </div>
+        <span class="ep-label">All data (JSON)</span>
+      </div>
 
-        <div class="scroll">
-          <table id="apps-table">
-            <thead>
-              <tr>
-                <th style="width:22%">App</th>
-                <th>App ID</th>
-                <th style="width:12%">Track</th>
-                <th style="width:12%">Version</th>
-                <th style="width:12%">Code</th>
-                <th style="width:16%">Date</th>
-                <th>Links</th>
-              </tr>
-            </thead>
-            <tbody id="apps-body"></tbody>
-          </table>
+      <div class="ep-row">
+        <div class="ep-code" id="ep-compact">./index.html?format=json&latest=1</div>
+        <div class="ep-actions">
+          <button class="btn" data-ep-copy="#ep-compact">Copy</button>
+          <a class="btn ghost" target="_blank" rel="noopener" id="ep-compact-open">Open</a>
         </div>
+        <span class="ep-label">Compact map of id → {version, code}</span>
+      </div>
 
-        <div class="foot">
-          <strong>How to compare in your app</strong> — store an integer <code class="mono">version_code</code> locally.
-          Fetch <code class="mono">?format=code&amp;app=&lt;id&gt;</code> to get just the integer remote code.  
-          If remote &gt; local → prompt update. Need full data? Use <code class="mono">?format=json&amp;app=&lt;id&gt;</code>.
+      <div class="ep-row">
+        <div class="ep-code" id="ep-one">./index.html?format=json&app=target-tracker</div>
+        <div class="ep-actions">
+          <button class="btn" data-ep-copy="#ep-one">Copy</button>
+          <a class="btn ghost" target="_blank" rel="noopener" id="ep-one-open">Open</a>
         </div>
-      </section>
+        <span class="ep-label">Single app metadata (JSON)</span>
+      </div>
+
+      <div class="ep-row">
+        <div class="ep-code" id="ep-code">./index.html?format=code&app=target-tracker</div>
+        <div class="ep-actions">
+          <button class="btn" data-ep-copy="#ep-code">Copy</button>
+          <a class="btn ghost" target="_blank" rel="noopener" id="ep-code-open">Open</a>
+        </div>
+        <span class="ep-label">Just the integer code (best for quick checks)</span>
+      </div>
     </section>
+
+    <!-- Desktop table -->
+    <section class="table-wrap" aria-label="Versions table (desktop)">
+      <div class="table-head">Human view • Use endpoints above for apps</div>
+      <div class="scroll">
+        <table id="apps-table">
+          <thead>
+            <tr>
+              <th style="width:26%">App</th>
+              <th>App ID</th>
+              <th style="width:12%">Track</th>
+              <th style="width:12%">Version</th>
+              <th style="width:12%">Code</th>
+              <th style="width:16%">Date</th>
+              <th>Links</th>
+            </tr>
+          </thead>
+          <tbody id="apps-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Mobile list -->
+    <ul class="m-list" id="m-list" aria-label="Versions list (mobile)"></ul>
   </main>
 </div>
 
@@ -265,7 +295,7 @@
 <script id="versions-data" type="application/json">
 {
   "schemaVersion": 2,
-  "generated": "2025-10-17T14:20:00Z",
+  "generated": "2025-10-17T14:45:00Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -273,7 +303,7 @@
       "name": "TornTargetTracker",
       "tracks": {
         "stable": {
-          "version": "2.6.3",
+          "version": "2.6.1",
           "code": 20601,
           "date": "2025-10-16",
           "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.1",
@@ -282,314 +312,50 @@
         }
       },
       "history": [
-        {
-          "version": "2.6.0",
-          "code": 20600,
-          "date": "2025-10-14",
-          "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.0"
-        }
+        { "version": "2.6.0", "code": 20600, "date": "2025-10-14", "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.0" }
       ]
     },
-    {
-      "id": "swift-image-uploader",
-      "name": "Swift-Image-Uploader",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Swift-Image-Uploader/releases",
-          "download": "https://github.com/skillerious/Swift-Image-Uploader/releases/latest",
-          "notes": "Utilizes GitHub repo/token to host and manage images."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "swiftformatter",
-      "name": "SwiftFormatter",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/SwiftFormatter/releases",
-          "download": "https://github.com/skillerious/SwiftFormatter/releases/latest",
-          "notes": "Professional USB drive formatter."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "loopback-recorder",
-      "name": "Loopback-Recorder",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Loopback-Recorder/releases",
-          "download": "https://github.com/skillerious/Loopback-Recorder/releases/latest",
-          "notes": "Record Windows system audio."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "starfield-iddb",
-      "name": "Starfield-IDDB",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Starfield-IDDB/releases",
-          "download": "https://github.com/skillerious/Starfield-IDDB/releases/latest",
-          "notes": "Console command database + JSON editor."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "cleanname",
-      "name": "CleanName",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/CleanName/releases",
-          "download": "https://github.com/skillerious/CleanName/releases/latest",
-          "notes": "File re-namer with loads of features."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "modninja",
-      "name": "ModNinja",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/ModNinja/releases",
-          "download": "https://github.com/skillerious/ModNinja/releases/latest",
-          "notes": "View and export Vortex mod lists."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "website",
-      "name": "Website",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Website/releases",
-          "download": "https://github.com/skillerious/Website/releases/latest",
-          "notes": "Markiva marketing site."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "ytaudio",
-      "name": "YTAudio",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/YTAudio/releases",
-          "download": "https://github.com/skillerious/YTAudio/releases/latest",
-          "notes": "Download audio from YouTube URLs."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "markiva",
-      "name": "Markiva",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Markiva/releases",
-          "download": "https://github.com/skillerious/Markiva/releases/latest",
-          "notes": "Dark-themed, offline-first Markdown editor."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "falloutsheltersge",
-      "name": "FalloutShelterSGE",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/FalloutShelterSGE/releases",
-          "download": "https://github.com/skillerious/FalloutShelterSGE/releases/latest",
-          "notes": "Save file editor for Fallout Shelter."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "robindoak",
-      "name": "RobinDoak",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/RobinDoak/releases",
-          "download": "https://github.com/skillerious/RobinDoak/releases/latest",
-          "notes": "Personal site repo."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "swifthelp",
-      "name": "SwiftHelp",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/SwiftHelp/releases",
-          "download": "https://github.com/skillerious/SwiftHelp/releases/latest",
-          "notes": "Electron-based help-authoring tool."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "webdownloader",
-      "name": "WebDownloader",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/WebDownloader/releases",
-          "download": "https://github.com/skillerious/WebDownloader/releases/latest",
-          "notes": "Website downloading tool."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "tornchainer",
-      "name": "TornChainer",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/TornChainer/releases",
-          "download": "https://github.com/skillerious/TornChainer/releases/latest",
-          "notes": "Store chaining targets for Torn."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "swiftsfv",
-      "name": "SwiftSFV",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/SwiftSFV/releases",
-          "download": "https://github.com/skillerious/SwiftSFV/releases/latest",
-          "notes": "File verification utility."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "github-follower-tracker",
-      "name": "Github-Follower-Tracker",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Github-Follower-Tracker/releases",
-          "download": "https://github.com/skillerious/Github-Follower-Tracker/releases/latest",
-          "notes": "Follower tracking and analytics."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "skillerious",
-      "name": "skillerious",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/skillerious/releases",
-          "download": "https://github.com/skillerious/skillerious/releases/latest",
-          "notes": "Profile repo."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "age-converter-torn",
-      "name": "Age-Converter-Torn-",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Age-Converter-Torn-/releases",
-          "download": "https://github.com/skillerious/Age-Converter-Torn-/releases/latest",
-          "notes": "Userscript to convert Torn age in days."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "fixelate-pro",
-      "name": "Fixelate-Pro",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Fixelate-Pro/releases",
-          "download": "https://github.com/skillerious/Fixelate-Pro/releases/latest",
-          "notes": "All-round image editor."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "snk",
-      "name": "snk (fork)",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/snk/releases",
-          "download": "https://github.com/skillerious/snk/releases/latest",
-          "notes": "Fork of Platane/snk."
-        }
-      },
-      "history": []
-    }
+
+    { "id": "swift-image-uploader", "name": "Swift-Image-Uploader",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/Swift-Image-Uploader/releases", "download": "https://github.com/skillerious/Swift-Image-Uploader/releases/latest", "notes": "Utilizes GitHub repo/token to host and manage images." } }, "history": [] },
+    { "id": "swiftformatter", "name": "SwiftFormatter",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/SwiftFormatter/releases", "download": "https://github.com/skillerious/SwiftFormatter/releases/latest", "notes": "Professional USB drive formatter." } }, "history": [] },
+    { "id": "loopback-recorder", "name": "Loopback-Recorder",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/Loopback-Recorder/releases", "download": "https://github.com/skillerious/Loopback-Recorder/releases/latest", "notes": "Record Windows system audio." } }, "history": [] },
+    { "id": "starfield-iddb", "name": "Starfield-IDDB",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/Starfield-IDDB/releases", "download": "https://github.com/skillerious/Starfield-IDDB/releases/latest", "notes": "Console command database + JSON editor." } }, "history": [] },
+    { "id": "cleanname", "name": "CleanName",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/CleanName/releases", "download": "https://github.com/skillerious/CleanName/releases/latest", "notes": "File re-namer with loads of features." } }, "history": [] },
+    { "id": "modninja", "name": "ModNinja",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/ModNinja/releases", "download": "https://github.com/skillerious/ModNinja/releases/latest", "notes": "View and export Vortex mod lists." } }, "history": [] },
+    { "id": "website", "name": "Website",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/Website/releases", "download": "https://github.com/skillerious/Website/releases/latest", "notes": "Markiva marketing site." } }, "history": [] },
+    { "id": "ytaudio", "name": "YTAudio",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/YTAudio/releases", "download": "https://github.com/skillerious/YTAudio/releases/latest", "notes": "Download audio from YouTube URLs." } }, "history": [] },
+    { "id": "markiva", "name": "Markiva",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/Markiva/releases", "download": "https://github.com/skillerious/Markiva/releases/latest", "notes": "Dark-themed, offline-first Markdown editor." } }, "history": [] },
+    { "id": "falloutsheltersge", "name": "FalloutShelterSGE",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/FalloutShelterSGE/releases", "download": "https://github.com/skillerious/FalloutShelterSGE/releases/latest", "notes": "Save file editor for Fallout Shelter." } }, "history": [] },
+    { "id": "robindoak", "name": "RobinDoak",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/RobinDoak/releases", "download": "https://github.com/skillerious/RobinDoak/releases/latest", "notes": "Personal site repo." } }, "history": [] },
+    { "id": "swifthelp", "name": "SwiftHelp",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/SwiftHelp/releases", "download": "https://github.com/skillerious/SwiftHelp/releases/latest", "notes": "Electron-based help-authoring tool." } }, "history": [] },
+    { "id": "webdownloader", "name": "WebDownloader",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/WebDownloader/releases", "download": "https://github.com/skillerious/WebDownloader/releases/latest", "notes": "Website downloading tool." } }, "history": [] },
+    { "id": "tornchainer", "name": "TornChainer",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/TornChainer/releases", "download": "https://github.com/skillerious/TornChainer/releases/latest", "notes": "Store chaining targets for Torn." } }, "history": [] },
+    { "id": "swiftsfv", "name": "SwiftSFV",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/SwiftSFV/releases", "download": "https://github.com/skillerious/SwiftSFV/releases/latest", "notes": "File verification utility." } }, "history": [] },
+    { "id": "github-follower-tracker", "name": "Github-Follower-Tracker",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/Github-Follower-Tracker/releases", "download": "https://github.com/skillerious/Github-Follower-Tracker/releases/latest", "notes": "Follower tracking and analytics." } }, "history": [] },
+    { "id": "skillerious", "name": "skillerious",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/skillerious/releases", "download": "https://github.com/skillerious/skillerious/releases/latest", "notes": "Profile repo." } }, "history": [] },
+    { "id": "age-converter-torn", "name": "Age-Converter-Torn-",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/Age-Converter-Torn-/releases", "download": "https://github.com/skillerious/Age-Converter-Torn-/releases/latest", "notes": "Userscript to convert Torn age in days." } }, "history": [] },
+    { "id": "fixelate-pro", "name": "Fixelate-Pro",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/Fixelate-Pro/releases", "download": "https://github.com/skillerious/Fixelate-Pro/releases/latest", "notes": "All-round image editor." } }, "history": [] },
+    { "id": "snk", "name": "snk (fork)",
+      "tracks": { "stable": { "version": "", "code": 0, "date": "", "url": "https://github.com/skillerious/snk/releases", "download": "https://github.com/skillerious/snk/releases/latest", "notes": "Fork of Platane/snk." } }, "history": [] }
   ]
 }
 </script>
@@ -598,6 +364,7 @@
 <script>
 (function(){
   const $ = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
   const qs = new URLSearchParams(location.search);
 
   /* ----- Parse JSON safely ----- */
@@ -608,7 +375,7 @@
     document.title="versions.json"; return;
   }
 
-  /* ----- Machine-friendly endpoints ----- */
+  /* ----- Machine-readable endpoints ----- */
   const format = (qs.get("format")||"").toLowerCase();
   if (format){
     const appId = qs.get("app");
@@ -664,6 +431,9 @@ download=${L.download??""}\n`;
     }
 
     if (format === "json"){
+      const apps = data.apps||[];
+      const pickLatest = (app)=> app.tracks && (app.tracks[trackKey] || app.tracks.stable) || null;
+
       if (latestOnly){
         const latest = {};
         for (const a of apps){ const L = pickLatest(a); if (L) latest[a.id] = {version:L.version, code:L.code}; }
@@ -685,30 +455,28 @@ download=${L.download??""}\n`;
     }
   }
 
-  /* ----- Interactive UI ----- */
-  const updated = $("#updated-badge");
-  updated.textContent = (()=>{ try{ const dt=new Date(data.generated); if(!isNaN(dt)) return dt.toISOString().replace("T"," ").replace("Z"," UTC"); }catch{} return (data.generated||"–") })();
+  /* ----- Interactive (UI) ----- */
   $("#schema-ver").textContent = String(data.schemaVersion||"2");
+  $("#updated-badge").textContent = (()=>{ try{ const dt=new Date(data.generated); if(!isNaN(dt)) return dt.toISOString().replace("T"," ").replace("Z"," UTC"); }catch{} return (data.generated||"—") })();
 
-  const qInput=$("#q"), trackSel=$("#track"), sortSel=$("#sort"), denseBtn=$("#toggle-density");
-  const cards=$("#cards"), tbody=$("#apps-body");
+  const qInput=$("#q"), trackSel=$("#track"), sortSel=$("#sort");
+  const tbody=$("#apps-body"), list=$("#m-list"), epApp=$("#ep-app");
 
-  const toRows = ()=> {
+  function toRows(){
     const rows=[];
     for (const app of (data.apps||[])){
-      const tracks=app.tracks||{};
-      for (const [tName, latest] of Object.entries(tracks)){
-        rows.push({app, track:tName, latest});
+      for (const [track, latest] of Object.entries(app.tracks||{})){
+        rows.push({app, track, latest});
       }
     }
     return rows;
-  };
+  }
 
-  const applyFilters = (rows)=>{
-    const q=(qInput.value||"").trim().toLowerCase();
+  function applyFilters(rows){
+    const q=(qInput.value||"").toLowerCase().trim();
     const t=(trackSel.value||"all").toLowerCase();
     let out = rows.filter(r=>{
-      const hit = !q || (r.app.id.toLowerCase().includes(q) || (r.app.name||"").toLowerCase().includes(q) || (r.latest.version||"").toLowerCase().includes(q));
+      const hit = !q || (r.app.id.toLowerCase().includes(q) || (r.app.name||"").toLowerCase().includes(q) || String(r.latest.code??"").includes(q) || String(r.latest.version||"").toLowerCase().includes(q));
       const tk = t==="all" || r.track===t;
       return hit && tk;
     });
@@ -719,81 +487,150 @@ download=${L.download??""}\n`;
       default: out.sort((a,b)=>(b.latest.code??0)-(a.latest.code??0));
     }
     return out;
-  };
+  }
 
-  const renderCards = (rows)=>{
-    cards.innerHTML="";
-    const map=new Map();
-    for (const r of rows){
-      const cur=map.get(r.app.id);
-      if (!cur){ map.set(r.app.id,r); continue; }
-      if (cur.track!=="stable" && r.track==="stable"){ map.set(r.app.id,r); continue; }
-      if ((r.latest.code??0)>(cur.latest.code??0)) map.set(r.app.id,r);
-    }
-    for (const r of map.values()){
-      const div=document.createElement("div");
-      div.className="card";
-      div.setAttribute("data-app-id",r.app.id);
-      div.setAttribute("data-track",r.track);
-      div.setAttribute("data-version",r.latest.version||"");
-      div.setAttribute("data-code",String(r.latest.code??0));
-      div.innerHTML=`
-        <h3>${r.app.name||r.app.id}</h3>
-        <div class="kv">
-          <div class="k">App ID</div><div class="v mono">${r.app.id}</div>
-          <div class="k">Track</div><div class="v"><span class="pill ${r.track==='beta'?'beta':'ok'}">${r.track}</span></div>
-          <div class="k">Version</div><div class="v mono">${r.latest.version??"—"}</div>
-          <div class="k">Code</div><div class="v mono">${r.latest.code??"—"}</div>
-          <div class="k">Date</div><div class="v">${r.latest.date??"—"}</div>
-          <div class="k">Links</div>
-          <div class="v links">
-            ${(r.latest.url? `<a target="_blank" rel="noopener" href="${r.latest.url}">release</a>`:"")}
-            ${(r.latest.download? ` · <a target="_blank" rel="noopener" href="${r.latest.download}">download</a>`:"")}
-            ${(r.latest.notes? ` · <span title="${r.latest.notes}">notes</span>`:"")}
-          </div>
-        </div>`;
-      cards.appendChild(div);
-    }
-  };
-
-  const renderTable = (rows)=>{
+  function renderTable(rows){
     tbody.innerHTML="";
     for (const r of rows){
       const tr=document.createElement("tr");
-      tr.setAttribute("data-app-id",r.app.id);
-      tr.setAttribute("data-track",r.track);
-      tr.setAttribute("data-version",r.latest.version||"");
-      tr.setAttribute("data-code",String(r.latest.code??0));
-
-      const cells = [
-        {label:"App", html:`<strong>${r.app.name||r.app.id}</strong>`, cls:""},
-        {label:"App ID", html:r.app.id, cls:"id"},
-        {label:"Track", html:`<span class="pill ${r.track==='beta'?'beta':'ok'}">${r.track}</span>`, cls:""},
-        {label:"Version", html:(r.latest.version??"—"), cls:"mono"},
-        {label:"Code", html:(r.latest.code??"—"), cls:"mono"},
-        {label:"Date", html:(r.latest.date??"—"), cls:""},
-        {label:"Links", html:((r.latest.url? `<a href="${r.latest.url}" target="_blank" rel="noopener">release</a>`:"") + (r.latest.download? ` · <a href="${r.latest.download}" target="_blank" rel="noopener">download</a>`:"") + (r.latest.notes? ` · <span title="${r.latest.notes}">notes</span>`:"")), cls:"links"}
-      ];
-      for (const c of cells){
-        const td=document.createElement("td");
-        td.setAttribute("data-label", c.label);
-        td.className=c.cls;
-        td.innerHTML=c.html;
-        tr.appendChild(td);
-      }
+      const links=[];
+      if (r.latest.url) links.push(`<a href="${r.latest.url}" target="_blank" rel="noopener">release</a>`);
+      if (r.latest.download) links.push(`<a href="${r.latest.download}" target="_blank" rel="noopener">download</a>`);
+      if (r.latest.notes) links.push(`<span title="${r.latest.notes}">notes</span>`);
+      tr.innerHTML=`
+        <td><strong>${r.app.name||r.app.id}</strong></td>
+        <td class="id">${r.app.id}</td>
+        <td><span class="pill ${r.track==='beta'?'beta':'ok'}">${r.track}</span></td>
+        <td class="mono">${r.latest.version??"—"}</td>
+        <td class="mono">${r.latest.code??"—"}</td>
+        <td>${r.latest.date??"—"}</td>
+        <td class="links">${links.join(" · ")}</td>`;
       tbody.appendChild(tr);
     }
-  };
+  }
 
-  const build = ()=>{
+  function chevronSVG(){
+    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+  }
+
+  function renderMobile(rows){
+    list.innerHTML="";
+    for (const r of rows){
+      const li=document.createElement("li");
+      li.className="m-item";
+      li.setAttribute("aria-expanded","false");
+
+      const links=[];
+      if (r.latest.url) links.push(`<a href="${r.latest.url}" target="_blank" rel="noopener">release</a>`);
+      if (r.latest.download) links.push(`<a href="${r.latest.download}" target="_blank" rel="noopener">download</a>`);
+      if (r.latest.notes) links.push(`<span title="${r.latest.notes}">notes</span>`);
+
+      li.innerHTML = `
+        <div class="m-top">
+          <div class="m-icon"><img src="assets/icon.png" alt=""></div>
+          <div class="m-title">
+            <div class="m-name">${r.app.name||r.app.id}</div>
+            <div class="m-sub">
+              <span class="m-ver">${r.latest.version||"—"}</span>
+              <span class="m-code">${r.latest.code??"—"}</span>
+            </div>
+          </div>
+          <button class="chev" aria-label="Toggle details">${chevronSVG()}</button>
+        </div>
+
+        <div class="m-details">
+          <div class="m-divider"></div>
+          <div class="m-grid">
+            <div class="m-label">Track</div><div><span class="pill ${r.track==='beta'?'beta':'ok'}">${r.track}</span></div>
+            <div class="m-label">App ID</div><div class="mono">${r.app.id}</div>
+            <div class="m-label">Date</div><div>${r.latest.date??"—"}</div>
+            <div class="m-label">Links</div><div class="links">${links.join(" · ")||"—"}</div>
+          </div>
+          <div class="m-actions">
+            <button class="btn-mini" data-copy="code" data-val="${r.latest.code??0}">Copy code</button>
+            <button class="btn-mini" data-copy="endpoint" data-val="?format=code&app=${r.app.id}">Copy endpoint</button>
+            <a class="btn-mini" href="?format=json&app=${r.app.id}" target="_blank" rel="noopener">Open JSON</a>
+          </div>
+        </div>
+      `;
+
+      li.querySelector(".chev").addEventListener("click", ()=>{
+        const open = li.getAttribute("aria-expanded")==="true";
+        li.setAttribute("aria-expanded", open ? "false" : "true");
+      });
+
+      li.addEventListener("click", (e)=>{
+        const btn=e.target.closest(".chev, .btn-mini, a"); if(btn) return;
+        const open = li.getAttribute("aria-expanded")==="true";
+        li.setAttribute("aria-expanded", open ? "false" : "true");
+      });
+
+      list.appendChild(li);
+    }
+  }
+
+  function populateEndpointSelector(rows){
+    epApp.innerHTML="";
+    const seen=new Set();
+    for (const r of rows){
+      if (seen.has(r.app.id)) continue;
+      seen.add(r.app.id);
+      const opt=document.createElement("option");
+      opt.value=r.app.id; opt.textContent = `${r.app.name||r.app.id} (${r.app.id})`;
+      epApp.appendChild(opt);
+    }
+  }
+
+  function updateEndpointBoxes(){
+    const id = epApp.value || (data.apps?.[0]?.id) || "your-app-id";
+    const base = new URL(location.href);
+    const set = (el, path)=>{
+      el.textContent = path;
+      const u = new URL(location.href); u.search = path.replace("./index.html","").replace("./","");
+      const open = el.id+"-open";
+      const a = document.getElementById(open);
+      if (a) a.href = u.toString();
+    };
+    set($("#ep-one"), `./index.html?format=json&app=${id}`);
+    set($("#ep-code"), `./index.html?format=code&app=${id}`);
+  }
+
+  function build(){
     const rows = applyFilters(toRows());
-    renderCards(rows);
     renderTable(rows);
-    const first = rows[0]?.app?.id || (data.apps?.[0]?.id) || "your-app-id";
-    $("#ep-one").textContent = `./index.html?format=json&app=${first}`;
-    $("#ep-code").textContent = `./index.html?format=code&app=${first}`;
-  };
+    renderMobile(rows);
+    populateEndpointSelector(rows);
+    updateEndpointBoxes();
+  }
 
+  /* Copy buttons in endpoints panel */
+  document.addEventListener("click", async (e)=>{
+    const copyBtn = e.target.closest("[data-ep-copy]");
+    if (copyBtn){
+      const sel = copyBtn.getAttribute("data-ep-copy");
+      const box = $(sel);
+      const url = new URL(location.href);
+      url.search = box.textContent.replace("./index.html","").replace("./","");
+      try{ await navigator.clipboard.writeText(url.toString()); copyBtn.textContent="Copied"; setTimeout(()=>copyBtn.textContent="Copy",900); }catch{ alert(url.toString()); }
+    }
+  });
+
+  /* Copy actions inside mobile card */
+  list.addEventListener("click", async (e)=>{
+    const b = e.target.closest(".btn-mini[data-copy]");
+    if (!b) return;
+    const val = b.getAttribute("data-val") || "";
+    if (b.dataset.copy==="code"){
+      try{ await navigator.clipboard.writeText(String(val)); b.textContent="Copied"; setTimeout(()=>b.textContent="Copy code",900);}catch{}
+    } else if (b.dataset.copy==="endpoint"){
+      const u = new URL(location.href); u.search = val;
+      try{ await navigator.clipboard.writeText(u.toString()); b.textContent="Copied"; setTimeout(()=>b.textContent="Copy endpoint",900);}catch{}
+    }
+  });
+
+  /* Toolbar + endpoints interactions */
   $("#btn-copy-json").addEventListener("click", async ()=>{
     const url = new URL(location.href); url.search="?format=json";
     try{ await navigator.clipboard.writeText(url.toString()); const b=$("#btn-copy-json"); const t=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=t,1000);}catch{ alert("Copy failed. "+url.toString()); }
@@ -802,25 +639,13 @@ download=${L.download??""}\n`;
     const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
     const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="versions.json"; a.click(); URL.revokeObjectURL(a.href);
   });
-  $("#btn-copy-curl").addEventListener("click", async ()=>{
-    const url = new URL(location.href); url.search="?format=json&latest=1";
-    const cmd = `curl -fsSL "${url.toString()}"`;
-    try{ await navigator.clipboard.writeText(cmd); const b=$("#btn-copy-curl"); const t=b.textContent; b.textContent="Copied"; setTimeout(()=>b.textContent=t,900);}catch{ alert(cmd); }
-  });
-  $("#toggle-density").addEventListener("click", ()=>{
-    document.body.classList.toggle("dense");
-    const on=document.body.classList.contains("dense");
-    $("#toggle-density").textContent = on ? "Comfortable" : "Dense";
-    document.querySelectorAll("tbody td, thead th").forEach(el=>el.style.padding = on ? "8px 12px" : "14px 16px");
-  });
 
   $("#q").addEventListener("input", build);
   $("#track").addEventListener("change", build);
   $("#sort").addEventListener("change", build);
+  $("#ep-app").addEventListener("change", updateEndpointBoxes);
 
-  // Set header timestamp / build UI
-  const b = $("#updated-badge");
-  b.textContent = b.textContent.replace("Updated…", "");
+  /* Initialize */
   build();
 })();
 </script>
