@@ -12,7 +12,7 @@
       --panel:#0f151c; --panel2:#0c1218;
       --surface:#121a23;
       --ring:rgba(255,255,255,.08); --ring-2:rgba(255,255,255,.18);
-      --text:#eaf2ff; --dim:#a8b5c6;
+      --text:#eaf2ff; --muted:#c9d6e6; --dim:#a8b5c6;
       --accent:#5ce1ff; --accent-2:#2dd4bf;
       --ok:#42d392; --beta:#74c3ff; --warn:#faba4a;
       --shadow:0 16px 46px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.03);
@@ -33,44 +33,40 @@
     }
     .page{min-height:100vh;display:flex;flex-direction:column}
 
-    /* ===== Header / Branding ===== */
+    /* ===== Brand header ===== */
     .top{
       padding:22px 20px 8px;
       display:grid; grid-template-columns:1fr auto; gap:16px; align-items:center;
     }
-    .brand{
-      display:flex; align-items:center; gap:14px; min-width:0;
+    .brand{display:flex; align-items:center; gap:14px; min-width:0}
+    .logo{
+      width:48px;height:48px;border-radius:12px;overflow:hidden;
+      background:#0e1620;border:1px solid var(--ring);box-shadow:0 0 0 4px rgba(92,225,255,.06)
     }
-    .brand .logo{
-      width:48px;height:48px;border-radius:12px;
-      background:linear-gradient(135deg,#0e1c25,#0a141b);
-      border:1px solid var(--ring); box-shadow:0 0 0 4px rgba(92,225,255,.06);
-      overflow:hidden; display:grid; place-items:center;
-    }
-    .brand .logo img{width:100%;height:100%;object-fit:cover;display:block}
-    .brand h1{margin:0;font-size:26px;letter-spacing:.2px}
+    .logo img{width:100%;height:100%;object-fit:cover;display:block}
+    .title-wrap{min-width:0}
+    h1{margin:0;font-size:26px;letter-spacing:.2px}
     .ownerline{
-      margin-top:2px; display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+      margin-top:4px; display:flex; flex-wrap:wrap; align-items:center; gap:10px;
       color:var(--dim); font-size:13px;
     }
     .owner-tag{
-      display:inline-flex; align-items:center; gap:10px; padding:6px 10px; border-radius:999px;
-      background:var(--surface); border:1px solid var(--ring);
+      display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
+      background:var(--surface); border:1px solid var(--ring); text-decoration:none; color:inherit
     }
-    .owner-name{font-weight:700; color:#d6edff}
+    .owner-name{font-weight:750; color:#d6edff}
     .updated-pill{
       display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
       background:var(--surface); border:1px solid var(--ring); color:var(--dim);
     }
     .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px rgba(92,225,255,.16)}
     .schema{
-      justify-self:end;
-      display:flex; gap:10px; align-items:center;
+      justify-self:end; display:flex; gap:10px; align-items:center;
     }
     .schema .chip{
       padding:7px 12px;border-radius:999px;white-space:nowrap;
       background:linear-gradient(180deg,rgba(92,225,255,.16),rgba(92,225,255,.1));
-      border:1px solid rgba(92,225,255,.28); color:#e7fbff; font-size:12px; font-weight:600;
+      border:1px solid rgba(92,225,255,.28); color:#e7fbff; font-size:12px; font-weight:650;
     }
     .schema .chip small{color:#c8e8ff; opacity:.9}
 
@@ -100,25 +96,71 @@
     .endpoints{
       background:linear-gradient(180deg,var(--panel),var(--panel2));
       border:1px solid var(--ring); border-radius:var(--radius); box-shadow:var(--shadow);
-      padding:12px 12px 14px; display:grid; gap:10px;
+      padding:14px; display:grid; gap:12px;
     }
-    .ep-row{display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center}
+    .ep-controls{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
     .ep-label{color:var(--dim); font-size:12px}
-    .ep-code{
-      font-family:var(--mono); font-size:13px; color:#cff2ff; background:var(--surface);
-      border:1px solid var(--ring); border-radius:10px; padding:10px 12px; overflow:auto
-    }
-    .ep-actions{display:flex; gap:8px}
-    .ep-actions .btn{padding:8px 10px; font-size:12px}
-    .ep-controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-    .ep-controls select{min-width:180px}
-    .ep-hint{color:var(--dim); font-size:12px}
 
-    /* ===== Table (desktop) ===== */
+    /* Custom dark picker */
+    .picker{position:relative}
+    .picker[aria-expanded="false"] .picker-panel{display:none} /* ensure hidden when closed */
+    .picker-btn{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      min-width:280px;padding:10px 12px;border-radius:12px;border:1px solid var(--ring);
+      background:var(--surface);color:var(--text);cursor:pointer
+    }
+    .picker-btn .value{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .picker-btn svg{flex:0 0 auto;opacity:.8;transition:transform .18s ease}
+    .picker[aria-expanded="true"] .picker-btn svg{transform:rotate(180deg)}
+    .picker-panel{
+      position:absolute;inset:auto 0 auto 0;top:calc(100% + 6px);
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--ring);border-radius:12px;box-shadow:var(--shadow);z-index:20;
+      padding:10px;display:grid;gap:8px;
+    }
+    .picker-search{background:var(--surface);color:var(--text);border:1px solid var(--ring);border-radius:10px;padding:8px 10px}
+    .picker-list{
+      max-height:260px;overflow:auto;border:1px solid var(--ring);border-radius:10px;
+      background:var(--surface);padding:6px
+    }
+    .picker-item{
+      padding:8px 10px;border-radius:8px;cursor:pointer;display:flex;gap:8px;align-items:center
+    }
+    .picker-item:hover,.picker-item[aria-selected="true"]{background:rgba(255,255,255,.06)}
+    .picker-item small{color:var(--dim)}
+    /* dark scrollbars */
+    .picker-list, .ep-code{
+      scrollbar-width:thin; scrollbar-color:#314052 transparent;
+    }
+    .picker-list::-webkit-scrollbar, .ep-code::-webkit-scrollbar{height:10px;width:10px}
+    .picker-list::-webkit-scrollbar-track, .ep-code::-webkit-scrollbar-track{background:transparent;border-radius:10px}
+    .picker-list::-webkit-scrollbar-thumb, .ep-code::-webkit-scrollbar-thumb{background:#324153;border-radius:10px;border:2px solid transparent;background-clip:content-box}
+
+    /* Endpoint rows */
+    .ep-row{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center}
+    .ep-code{
+      position:relative; display:flex; align-items:center;
+      font-family:var(--mono); font-size:13px; color:#cff2ff;
+      background:var(--surface); border:1px solid var(--ring); border-radius:10px;
+      padding:10px 84px 10px 12px; /* right space for icon buttons */
+      overflow:auto; white-space:nowrap;
+    }
+    .ep-actions{
+      position:absolute; right:6px; display:flex; gap:6px;
+    }
+    .icon-btn{
+      width:32px;height:32px;border-radius:8px;border:1px solid var(--ring);
+      display:grid;place-items:center;background:linear-gradient(180deg,#1b2330,#121821);
+      color:var(--text); cursor:pointer;
+    }
+    .icon-btn:hover{border-color:var(--ring-2)}
+    .ep-note{color:var(--dim); font-size:12px; margin-top:-2px}
+
+    /* ===== Desktop table ===== */
     .table-wrap{
       background:linear-gradient(180deg,var(--panel),var(--panel2));
       border:1px solid var(--ring); border-radius:var(--radius); box-shadow:var(--shadow);
-      display:grid; grid-template-rows:auto 1fr; min-height:0;
+      display:grid; grid-template-rows:auto 1fr; min-height:0
     }
     .table-head{padding:12px 16px;border-bottom:1px solid var(--ring); color:var(--dim); font-size:13px}
     .scroll{overflow:auto; min-height:0}
@@ -130,42 +172,101 @@
     tbody td{padding:14px 16px;border-bottom:1px solid var(--ring)}
     tbody tr:hover td{background:rgba(255,255,255,.02)}
     .id{font-family:var(--mono);color:var(--dim)}
+    .links a{color:var(--accent);text-decoration:none}
+    .links a:hover{text-decoration:underline}
     .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--ring);font-size:12px}
     .pill.ok{background:rgba(66,211,146,.12);color:#cfeedd;border-color:rgba(66,211,146,.28)}
     .pill.beta{background:rgba(116,195,255,.12);color:#d8ecff;border-color:rgba(116,195,255,.28)}
-    .links a{color:var(--accent);text-decoration:none}
-    .links a:hover{text-decoration:underline}
 
-    /* ===== Mobile LIST with expandable rows ===== */
-    .m-list{display:none}
-    .m-item{
-      list-style:none; background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--ring); border-radius:14px; box-shadow:var(--shadow);
-      padding:12px; display:grid; gap:10px;
-    }
-    .m-top{
-      display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:center;
-    }
-    .m-icon{width:44px;height:44px;border-radius:10px;overflow:hidden;border:1px solid var(--ring); background:#0e1620}
-    .m-icon img{width:100%;height:100%;object-fit:cover;display:block}
-    .m-title{min-width:0}
-    .m-name{font-weight:800; font-size:16px; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-    .m-sub{display:flex; gap:8px; align-items:center; margin-top:2px; color:var(--dim); font-size:12px}
-    .m-code{font-family:var(--mono); font-weight:800; letter-spacing:.3px; padding:4px 8px; border-radius:8px; background:rgba(92,225,255,.10); border:1px solid rgba(92,225,255,.25); color:#d8f6ff}
-    .m-ver{font-family:var(--mono)}
-    .chev{
-      width:36px;height:36px;border-radius:999px;border:1px solid var(--ring);
-      display:grid;place-items:center;background:var(--surface);cursor:pointer
-    }
-    .chev svg{transition:transform .18s ease}
-    .m-item[aria-expanded="true"] .chev svg{transform:rotate(180deg)}
-    .m-details{display:none}
-    .m-item[aria-expanded="true"] .m-details{display:block}
-    .m-grid{display:grid; grid-template-columns:110px 1fr; gap:6px 12px; font-size:13px}
-    .m-label{color:var(--dim)}
-    .m-actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
-    .btn-mini{display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:6px 10px; border-radius:999px; border:1px solid var(--ring); background:var(--surface); color:var(--text); cursor:pointer}
-    .m-divider{height:1px;background:var(--ring); margin:8px 0}
+    /* ===== Mobile LIST (no icons), expandable card rows ===== */
+.m-list{
+  display:none;
+  width:100%;
+  padding:0;          /* ensure same width as other cards */
+  margin:0;           /* reset default UL margin */
+  list-style:none;    /* no bullets */
+}
+.m-item{
+  list-style:none;
+  background:linear-gradient(180deg,var(--panel),var(--panel2));
+  border:1px solid var(--ring);
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  padding:12px;
+  display:grid;
+  gap:10px;
+}
+.m-top{
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  gap:12px;
+  align-items:center;
+}
+.m-name{
+  font-weight:800;
+  font-size:16px;
+  letter-spacing:.2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.m-meta{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  color:var(--dim);
+  font-size:12px;
+}
+.m-ver{font-family:var(--mono)}
+.m-code{
+  font-family:var(--mono);
+  font-weight:800;
+  letter-spacing:.3px;
+  padding:4px 8px;
+  border-radius:8px;
+  background:rgba(92,225,255,.10);
+  border:1px solid rgba(92,225,255,.25);
+  color:#d8f6ff;
+}
+.chev{
+  width:36px;height:36px;
+  border-radius:999px;
+  border:1px solid var(--ring);
+  display:grid;place-items:center;
+  background:var(--surface);
+  cursor:pointer;
+}
+.chev svg{transition:transform .18s ease}
+.m-item[aria-expanded="true"] .chev svg{transform:rotate(180deg)}
+.m-details{display:none}
+.m-item[aria-expanded="true"] .m-details{display:block}
+.m-grid{
+  display:grid;
+  grid-template-columns:110px 1fr;
+  gap:6px 12px;
+  font-size:13px;
+}
+.m-label{color:var(--dim)}
+.m-actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+.btn-mini{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:12px; padding:6px 10px;
+  border-radius:999px; border:1px solid var(--ring);
+  background:var(--surface); color:var(--text);
+  cursor:pointer;
+}
+.m-divider{height:1px;background:var(--ring); margin:8px 0}
+
+/* Keep the list full-width in mobile layout */
+@media (max-width: 900px){
+  .m-list{
+    display:grid;
+    gap:12px;
+    padding:0;  /* reinforce reset */
+    margin:0;
+  }
+}
+
 
     /* ===== Responsive rules ===== */
     @media (max-width: 900px){
@@ -177,7 +278,11 @@
       .input{min-width:0}
       .table-wrap{display:none}
       .m-list{display:grid; gap:12px}
+      .ep-row{grid-template-columns:1fr}
     }
+
+    /* Raw output style (when ?format=*) */
+    pre.json-out{margin:0;padding:20px;background:#0c0f13;color:#e6f1ff;font-family:var(--mono);font-size:13px}
   </style>
 </head>
 <body>
@@ -185,23 +290,25 @@
   <!-- ===== Header ===== -->
   <header class="top">
     <div class="brand">
-      <div class="logo"><img src="assets/icon.png" alt="Skillerious icon"></div>
-      <div>
+      <div class="logo"><img src="assets/icon.ico" alt="Skillerious icon"></div>
+      <div class="title-wrap">
         <h1>App Versions</h1>
         <div class="ownerline">
-          <span class="owner-tag"><span class="owner-name">Skillerious</span> — <span>Robin Doak</span></span>
+          <a class="owner-tag" href="https://github.com/skillerious" target="_blank" rel="noopener">
+            <span class="owner-name">Skillerious</span> — <span>Robin Doak</span>
+          </a>
           <span class="updated-pill"><span class="dot"></span><span id="updated-badge">Updated…</span></span>
         </div>
       </div>
     </div>
     <div class="schema">
-      <span class="chip">Schema <strong>v<span id="schema-ver">2</span></strong> <small>• JSON / TXT / INI / CODE</small></span>
+      <span class="chip">Spec <strong>v<span id="schema-ver">2</span></strong> <small>• Endpoints: json / txt / ini / code</small></span>
     </div>
   </header>
 
   <!-- ===== Main ===== -->
   <main class="main">
-    <!-- Controls -->
+    <!-- Filters -->
     <div class="toolbar" role="region" aria-label="Filters">
       <input id="q" class="input" type="search" placeholder="Search apps…" aria-label="Search apps">
       <select id="track">
@@ -220,48 +327,85 @@
       <button class="btn ok" id="btn-download-json">Download JSON</button>
     </div>
 
-    <!-- Endpoints (beautiful & copyable) -->
-    <section class="endpoints">
+    <!-- Endpoints -->
+    <section class="endpoints" aria-label="Endpoints">
       <div class="ep-controls">
         <span class="ep-label">Select app for examples:</span>
-        <select id="ep-app"></select>
-        <span class="ep-hint">Copy any endpoint or open with one tap.</span>
+
+        <div class="picker" id="app-picker" aria-expanded="false">
+          <button class="picker-btn" id="picker-btn" aria-haspopup="listbox" aria-expanded="false" type="button">
+            <span class="value" id="picker-value">Loading…</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="picker-panel" id="picker-panel">
+            <input class="picker-search" id="picker-search" placeholder="Search app…" />
+            <ul class="picker-list" id="picker-list" role="listbox" tabindex="-1" aria-label="Choose app"></ul>
+          </div>
+        </div>
       </div>
 
       <div class="ep-row">
-        <div class="ep-code" id="ep-all">./index.html?format=json</div>
-        <div class="ep-actions">
-          <button class="btn" data-ep-copy="#ep-all">Copy</button>
-          <a class="btn ghost" target="_blank" rel="noopener" id="ep-all-open">Open</a>
+        <div class="ep-code" id="ep-all">
+          <span class="path">./index.html?format=json</span>
+          <span class="ep-actions">
+            <button class="icon-btn" title="Copy" data-ep-copy="#ep-all" aria-label="Copy">
+              <!-- clipboard icon -->
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 7h6M9 3h6a2 2 0 012 2v2h1a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h1V5a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <a class="icon-btn" title="Open" id="ep-all-open" target="_blank" rel="noopener" aria-label="Open">
+              <!-- external link icon -->
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14 3h7v7m-1-6l-9 9M5 5h5M5 5v14a2 2 0 002 2h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </span>
         </div>
-        <span class="ep-label">All data (JSON)</span>
+        <div class="ep-note">All data (JSON)</div>
       </div>
 
       <div class="ep-row">
-        <div class="ep-code" id="ep-compact">./index.html?format=json&latest=1</div>
-        <div class="ep-actions">
-          <button class="btn" data-ep-copy="#ep-compact">Copy</button>
-          <a class="btn ghost" target="_blank" rel="noopener" id="ep-compact-open">Open</a>
+        <div class="ep-code" id="ep-compact">
+          <span class="path">./index.html?format=json&latest=1</span>
+          <span class="ep-actions">
+            <button class="icon-btn" title="Copy" data-ep-copy="#ep-compact" aria-label="Copy">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 7h6M9 3h6a2 2 0 012 2v2h1a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h1V5a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <a class="icon-btn" title="Open" id="ep-compact-open" target="_blank" rel="noopener" aria-label="Open">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14 3h7v7m-1-6l-9 9M5 5h5M5 5v14a2 2 0 002 2h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </span>
         </div>
-        <span class="ep-label">Compact map of id → {version, code}</span>
+        <div class="ep-note">Compact map of id → {version, code}</div>
       </div>
 
       <div class="ep-row">
-        <div class="ep-code" id="ep-one">./index.html?format=json&app=target-tracker</div>
-        <div class="ep-actions">
-          <button class="btn" data-ep-copy="#ep-one">Copy</button>
-          <a class="btn ghost" target="_blank" rel="noopener" id="ep-one-open">Open</a>
+        <div class="ep-code" id="ep-one">
+          <span class="path">./index.html?format=json&app=target-tracker</span>
+          <span class="ep-actions">
+            <button class="icon-btn" title="Copy" data-ep-copy="#ep-one" aria-label="Copy">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 7h6M9 3h6a2 2 0 012 2v2h1a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h1V5a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <a class="icon-btn" title="Open" id="ep-one-open" target="_blank" rel="noopener" aria-label="Open">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14 3h7v7m-1-6l-9 9M5 5h5M5 5v14a2 2 0 002 2h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </span>
         </div>
-        <span class="ep-label">Single app metadata (JSON)</span>
+        <div class="ep-note">Single app metadata (JSON)</div>
       </div>
 
       <div class="ep-row">
-        <div class="ep-code" id="ep-code">./index.html?format=code&app=target-tracker</div>
-        <div class="ep-actions">
-          <button class="btn" data-ep-copy="#ep-code">Copy</button>
-          <a class="btn ghost" target="_blank" rel="noopener" id="ep-code-open">Open</a>
+        <div class="ep-code" id="ep-code">
+          <span class="path">./index.html?format=code&app=target-tracker</span>
+          <span class="ep-actions">
+            <button class="icon-btn" title="Copy" data-ep-copy="#ep-code" aria-label="Copy">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 7h6M9 3h6a2 2 0 012 2v2h1a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h1V5a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <a class="icon-btn" title="Open" id="ep-code-open" target="_blank" rel="noopener" aria-label="Open">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14 3h7v7m-1-6l-9 9M5 5h5M5 5v14a2 2 0 002 2h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </span>
         </div>
-        <span class="ep-label">Just the integer code (best for quick checks)</span>
+        <div class="ep-note">Just the integer code (best for quick checks)</div>
       </div>
     </section>
 
@@ -295,7 +439,7 @@
 <script id="versions-data" type="application/json">
 {
   "schemaVersion": 2,
-  "generated": "2025-10-17T14:45:00Z",
+  "generated": "2025-10-17T15:00:00Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -431,22 +575,19 @@ download=${L.download??""}\n`;
     }
 
     if (format === "json"){
-      const apps = data.apps||[];
-      const pickLatest = (app)=> app.tracks && (app.tracks[trackKey] || app.tracks.stable) || null;
-
       if (latestOnly){
         const latest = {};
-        for (const a of apps){ const L = pickLatest(a); if (L) latest[a.id] = {version:L.version, code:L.code}; }
+        for (const a of (data.apps||[])){ const L = (a.tracks && (a.tracks[trackKey] || a.tracks.stable)) || null; if (L) latest[a.id] = {version:L.version, code:L.code}; }
         const out = {schemaVersion:data.schemaVersion, generated:data.generated, latest};
         document.body.innerHTML = '<pre class="json-out">'+JSON.stringify(out,null,2)+'</pre>'; document.title="versions.json"; return;
       }
       if (appId){
-        const app = apps.find(a=>a.id===appId);
+        const app = (data.apps||[]).find(a=>a.id===appId);
         if (!app){
-          const out = {error:"app_not_found", app:appId, available:apps.map(a=>a.id)};
+          const out = {error:"app_not_found", app:appId, available:(data.apps||[]).map(a=>a.id)};
           document.body.innerHTML = '<pre class="json-out">'+JSON.stringify(out,null,2)+'</pre>'; document.title="versions.json"; return;
         }
-        const L = pickLatest(app);
+        const L = (app.tracks && (app.tracks[trackKey] || app.tracks.stable)) || null;
         const trackName = L ? (Object.entries(app.tracks).find(([k,v])=>v===L)||[trackKey])[0] : trackKey;
         const out = {schemaVersion:data.schemaVersion, generated:data.generated, app:app.id, track:trackName, latest:L};
         document.body.innerHTML = '<pre class="json-out">'+JSON.stringify(out,null,2)+'</pre>'; document.title=`${app.id}.json`; return;
@@ -455,12 +596,19 @@ download=${L.download??""}\n`;
     }
   }
 
-  /* ----- Interactive (UI) ----- */
+  /* ----- Interactive UI ----- */
   $("#schema-ver").textContent = String(data.schemaVersion||"2");
-  $("#updated-badge").textContent = (()=>{ try{ const dt=new Date(data.generated); if(!isNaN(dt)) return dt.toISOString().replace("T"," ").replace("Z"," UTC"); }catch{} return (data.generated||"—") })();
+
+  // Pretty timestamp: "Updated 17 Oct 2025 • 15:00 UTC"
+  try{
+    const dt = new Date(data.generated);
+    const fmtDate = dt.toLocaleString('en-GB',{timeZone:'UTC',day:'2-digit',month:'short',year:'numeric'});
+    const fmtTime = dt.toLocaleString('en-GB',{timeZone:'UTC',hour:'2-digit',minute:'2-digit',hour12:false});
+    $("#updated-badge").textContent = `Updated ${fmtDate} • ${fmtTime} UTC`;
+  }catch{ $("#updated-badge").textContent = data.generated || "—"; }
 
   const qInput=$("#q"), trackSel=$("#track"), sortSel=$("#sort");
-  const tbody=$("#apps-body"), list=$("#m-list"), epApp=$("#ep-app");
+  const tbody=$("#apps-body"), list=$("#m-list");
 
   function toRows(){
     const rows=[];
@@ -527,16 +675,13 @@ download=${L.download??""}\n`;
       if (r.latest.download) links.push(`<a href="${r.latest.download}" target="_blank" rel="noopener">download</a>`);
       if (r.latest.notes) links.push(`<span title="${r.latest.notes}">notes</span>`);
 
+      const ver = r.latest.version || "—";
+      const code = (r.latest.code ?? "—");
+
       li.innerHTML = `
         <div class="m-top">
-          <div class="m-icon"><img src="assets/icon.png" alt=""></div>
-          <div class="m-title">
-            <div class="m-name">${r.app.name||r.app.id}</div>
-            <div class="m-sub">
-              <span class="m-ver">${r.latest.version||"—"}</span>
-              <span class="m-code">${r.latest.code??"—"}</span>
-            </div>
-          </div>
+          <div class="m-name">${r.app.name||r.app.id}</div>
+          <div class="m-meta"><span class="m-ver">${ver}</span><span class="m-code">${code}</span></div>
           <button class="chev" aria-label="Toggle details">${chevronSVG()}</button>
         </div>
 
@@ -549,20 +694,21 @@ download=${L.download??""}\n`;
             <div class="m-label">Links</div><div class="links">${links.join(" · ")||"—"}</div>
           </div>
           <div class="m-actions">
-            <button class="btn-mini" data-copy="code" data-val="${r.latest.code??0}">Copy code</button>
+            <button class="btn-mini" data-copy="code" data-val="${code}">Copy code</button>
             <button class="btn-mini" data-copy="endpoint" data-val="?format=code&app=${r.app.id}">Copy endpoint</button>
             <a class="btn-mini" href="?format=json&app=${r.app.id}" target="_blank" rel="noopener">Open JSON</a>
           </div>
         </div>
       `;
 
-      li.querySelector(".chev").addEventListener("click", ()=>{
+      li.querySelector(".chev").addEventListener("click", (e)=>{
+        e.stopPropagation();
         const open = li.getAttribute("aria-expanded")==="true";
         li.setAttribute("aria-expanded", open ? "false" : "true");
       });
 
       li.addEventListener("click", (e)=>{
-        const btn=e.target.closest(".chev, .btn-mini, a"); if(btn) return;
+        const btn=e.target.closest(".btn-mini, a"); if(btn) return;
         const open = li.getAttribute("aria-expanded")==="true";
         li.setAttribute("aria-expanded", open ? "false" : "true");
       });
@@ -571,66 +717,66 @@ download=${L.download??""}\n`;
     }
   }
 
-  function populateEndpointSelector(rows){
-    epApp.innerHTML="";
-    const seen=new Set();
-    for (const r of rows){
-      if (seen.has(r.app.id)) continue;
-      seen.add(r.app.id);
-      const opt=document.createElement("option");
-      opt.value=r.app.id; opt.textContent = `${r.app.name||r.app.id} (${r.app.id})`;
-      epApp.appendChild(opt);
-    }
-  }
+  /* ---------- Custom app picker (open/close properly) ---------- */
+  const picker = $("#app-picker"), pickerBtn = $("#picker-btn"), pickerPanel = $("#picker-panel");
+  const pickerList = $("#picker-list"), pickerSearch = $("#picker-search"), pickerValue = $("#picker-value");
 
+  function buildPicker(appIds){
+    pickerList.innerHTML="";
+    appIds.forEach(({id,name})=>{
+      const li=document.createElement("li");
+      li.className="picker-item"; li.tabIndex=0; li.setAttribute("role","option"); li.dataset.value=id;
+      li.innerHTML = `<span>${name||id}</span> <small>(${id})</small>`;
+      li.addEventListener("click", ()=>{ setPicker(id, name||id); closePicker(); updateEndpointBoxes(); });
+      li.addEventListener("keydown",(e)=>{ if(e.key==="Enter"){ setPicker(id, name||id); closePicker(); updateEndpointBoxes(); } });
+      pickerList.appendChild(li);
+    });
+    const first = appIds[0]; if(first) setPicker(first.id, first.name||first.id);
+  }
+  function setPicker(id, label){ picker.dataset.value=id; pickerValue.textContent = `${label} (${id})`; }
+  function openPicker(){ picker.setAttribute("aria-expanded","true"); pickerBtn.setAttribute("aria-expanded","true"); pickerPanel.style.display="grid"; pickerSearch.value=""; pickerSearch.focus(); filterPicker(); }
+  function closePicker(){ picker.setAttribute("aria-expanded","false"); pickerBtn.setAttribute("aria-expanded","false"); pickerPanel.style.display="none"; }
+  function filterPicker(){
+    const q = (pickerSearch.value||"").toLowerCase().trim();
+    $$(".picker-item", pickerList).forEach(li=>{
+      const text = li.textContent.toLowerCase(); li.style.display = text.includes(q) ? "" : "none";
+    });
+  }
+  pickerBtn.addEventListener("click", (e)=>{ e.stopPropagation(); const open = picker.getAttribute("aria-expanded")==="true"; open ? closePicker() : openPicker(); });
+  pickerSearch.addEventListener("input", filterPicker);
+  document.addEventListener("click", (e)=>{ if(!picker.contains(e.target)) closePicker(); });
+  document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closePicker(); });
+
+  /* ---------- Endpoint boxes (absolute URLs) ---------- */
+  function setEndpointBox(boxSel, path){
+    const box = $(boxSel);
+    const u = new URL(location.href);
+    u.search = path.replace("./index.html","").replace("./","");
+    box.querySelector(".path").textContent = path;
+    const openId = boxSel.replace("#","") + "-open";
+    const a = document.getElementById(openId);
+    if (a) a.href = u.toString();
+  }
   function updateEndpointBoxes(){
-    const id = epApp.value || (data.apps?.[0]?.id) || "your-app-id";
-    const base = new URL(location.href);
-    const set = (el, path)=>{
-      el.textContent = path;
-      const u = new URL(location.href); u.search = path.replace("./index.html","").replace("./","");
-      const open = el.id+"-open";
-      const a = document.getElementById(open);
-      if (a) a.href = u.toString();
-    };
-    set($("#ep-one"), `./index.html?format=json&app=${id}`);
-    set($("#ep-code"), `./index.html?format=code&app=${id}`);
+    const id = picker.dataset.value || (data.apps?.[0]?.id) || "your-app-id";
+    setEndpointBox("#ep-one", `./index.html?format=json&app=${id}`);
+    setEndpointBox("#ep-code", `./index.html?format=code&app=${id}`);
   }
 
-  function build(){
-    const rows = applyFilters(toRows());
-    renderTable(rows);
-    renderMobile(rows);
-    populateEndpointSelector(rows);
-    updateEndpointBoxes();
-  }
-
-  /* Copy buttons in endpoints panel */
+  /* Copy buttons */
   document.addEventListener("click", async (e)=>{
     const copyBtn = e.target.closest("[data-ep-copy]");
     if (copyBtn){
       const sel = copyBtn.getAttribute("data-ep-copy");
       const box = $(sel);
+      const path = box.querySelector(".path").textContent.trim();
       const url = new URL(location.href);
-      url.search = box.textContent.replace("./index.html","").replace("./","");
-      try{ await navigator.clipboard.writeText(url.toString()); copyBtn.textContent="Copied"; setTimeout(()=>copyBtn.textContent="Copy",900); }catch{ alert(url.toString()); }
+      url.search = path.replace("./index.html","").replace("./","");
+      try{ await navigator.clipboard.writeText(url.toString()); copyBtn.innerHTML = "✓"; setTimeout(()=>copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 7h6M9 3h6a2 2 0 012 2v2h1a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h1V5a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',800);}catch{ alert(url.toString()); }
     }
   });
 
-  /* Copy actions inside mobile card */
-  list.addEventListener("click", async (e)=>{
-    const b = e.target.closest(".btn-mini[data-copy]");
-    if (!b) return;
-    const val = b.getAttribute("data-val") || "";
-    if (b.dataset.copy==="code"){
-      try{ await navigator.clipboard.writeText(String(val)); b.textContent="Copied"; setTimeout(()=>b.textContent="Copy code",900);}catch{}
-    } else if (b.dataset.copy==="endpoint"){
-      const u = new URL(location.href); u.search = val;
-      try{ await navigator.clipboard.writeText(u.toString()); b.textContent="Copied"; setTimeout(()=>b.textContent="Copy endpoint",900);}catch{}
-    }
-  });
-
-  /* Toolbar + endpoints interactions */
+  /* Toolbar actions */
   $("#btn-copy-json").addEventListener("click", async ()=>{
     const url = new URL(location.href); url.search="?format=json";
     try{ await navigator.clipboard.writeText(url.toString()); const b=$("#btn-copy-json"); const t=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=t,1000);}catch{ alert("Copy failed. "+url.toString()); }
@@ -640,12 +786,24 @@ download=${L.download??""}\n`;
     const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="versions.json"; a.click(); URL.revokeObjectURL(a.href);
   });
 
+  /* Build everything */
+  function build(){
+    const rows = applyFilters(toRows());
+    renderTable(rows);
+    renderMobile(rows);
+
+    // Build app list for picker
+    const uniq=[]; const seen=new Set();
+    for(const r of rows){ if(!seen.has(r.app.id)){ seen.add(r.app.id); uniq.push({id:r.app.id,name:r.app.name}); } }
+    buildPicker(uniq);
+    updateEndpointBoxes();
+    closePicker(); // ensure closed on first render
+  }
+
   $("#q").addEventListener("input", build);
   $("#track").addEventListener("change", build);
   $("#sort").addEventListener("change", build);
-  $("#ep-app").addEventListener("change", updateEndpointBoxes);
 
-  /* Initialize */
   build();
 })();
 </script>
