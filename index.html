@@ -29,9 +29,10 @@
       padding:28px 24px 12px;display:grid;grid-template-columns:1fr auto;gap:16px;
       align-items:center
     }
-    .title-wrap{display:flex;align-items:center;gap:14px}
+    .title-wrap{display:flex;align-items:center;gap:14px;min-width:0}
     h1{margin:0;font-size:30px;letter-spacing:.2px}
     .badge{
+      white-space:nowrap;
       font-size:12px;padding:7px 10px;border-radius:999px;background:var(--muted);
       color:var(--dim);border:1px solid var(--ring)
     }
@@ -41,22 +42,16 @@
       color:#cfeeff;border:1px solid rgba(104,211,255,.28);font-size:12px
     }
 
-    /* Main area: toolbar + content (cards + table) fills viewport */
-    .main{
-      flex:1;display:grid;grid-template-rows:auto 1fr;gap:14px;
-      padding:10px 24px 24px;
-    }
+    .main{flex:1;display:grid;grid-template-rows:auto 1fr;gap:14px;padding:10px 24px 24px;min-height:0}
     .toolbar{
-      display:flex;gap:10px;align-items:center;background:linear-gradient(180deg,var(--panel),var(--muted2));
-      border:1px solid var(--ring);border-radius:var(--radius);box-shadow:var(--shadow);
-      padding:12px 12px 12px 14px
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:linear-gradient(180deg,var(--panel),var(--muted2));
+      border:1px solid var(--ring);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px 12px 12px 14px
     }
     .toolbar .spacer{flex:1}
     input[type="search"], select{
       background:var(--muted);color:var(--text);border:1px solid var(--ring);
       border-radius:10px;padding:10px 12px;outline:none;min-width:180px
     }
-    select{min-width:130px}
     .btn{
       appearance:none;border:1px solid var(--ring);
       background:linear-gradient(180deg,#1b2330,#121821);
@@ -65,12 +60,8 @@
     .btn:hover{border-color:var(--ring-2)}
     .btn.ghost{background:transparent}
     .btn.ok{background:linear-gradient(180deg,#13251b,#0f1a13);border-color:rgba(54,210,122,.35)}
-    .btn.warn{background:linear-gradient(180deg,#2a1f0f,#1a140b);border-color:rgba(232,184,74,.35)}
 
-    /* Content split: summary cards above a tall panel w/ sticky table */
     .content{display:grid;grid-template-rows:auto 1fr;gap:14px;min-height:0}
-
-    /* cards */
     .cards{
       display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
       gap:14px
@@ -80,7 +71,7 @@
       border:1px solid var(--ring);border-radius:14px;box-shadow:var(--shadow);
       padding:14px;display:grid;gap:8px
     }
-    .card h3{margin:0 0 6px 0}
+    .card h3{margin:0 0 6px 0;overflow:hidden;text-overflow:ellipsis}
     .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13px}
     .kv .k{color:var(--dim)}
     .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--ring);font-size:12px}
@@ -90,13 +81,17 @@
     .links a{color:var(--accent);text-decoration:none}
     .links a:hover{text-decoration:underline}
 
-    /* table panel fills remaining viewport height */
     .panel{
       background:linear-gradient(180deg,var(--panel),var(--muted2));
       border:1px solid var(--ring);border-radius:var(--radius);box-shadow:var(--shadow);
       display:grid;grid-template-rows:auto 1fr auto;min-height:0
     }
-    .panel .head{padding:12px 16px;border-bottom:1px solid var(--ring)}
+    .head{padding:12px 16px;border-bottom:1px solid var(--ring)}
+    .tray{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .endpoint{
+      background:var(--muted);border:1px solid var(--ring);border-radius:10px;
+      padding:10px 12px;font-family:var(--mono);color:var(--dim);font-size:12px;overflow:auto
+    }
     .scroll{overflow:auto;min-height:0}
     table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
     thead th{
@@ -108,16 +103,25 @@
     .id{font-family:var(--mono);color:var(--dim)}
     .foot{padding:12px 16px;color:var(--dim);border-top:1px dashed var(--ring);font-size:12px}
 
-    /* endpoints tray */
-    .tray{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 16px}
-    .endpoint{
-      background:var(--muted);border:1px solid var(--ring);border-radius:10px;
-      padding:10px 12px;font-family:var(--mono);color:var(--dim);font-size:12px;overflow:auto
-    }
     pre.json-out{margin:0;padding:20px;background:#0c0f13;color:#e6f1ff;font-family:var(--mono);font-size:13px}
-    .statbar{display:flex;gap:10px;flex-wrap:wrap}
-    .stat{background:var(--muted);border:1px solid var(--ring);border-radius:999px;padding:6px 10px;font-size:12px;color:var(--dim)}
-    .right{margin-left:auto}
+
+    /* ===== Mobile polish ===== */
+    @media (max-width: 900px){
+      header.top{grid-template-columns:1fr;gap:10px}
+      .schema{justify-self:start}
+      .main{padding:10px 14px 18px}
+      .toolbar{gap:8px}
+      .toolbar > *{flex:1 1 100%}
+      input[type="search"],select,.btn{min-width:0}
+      .cards{grid-template-columns:1fr}
+      /* Turn table rows into labeled blocks */
+      thead{display:none}
+      table, tbody, tr, td{display:block;width:100%}
+      tbody tr{border-top:1px solid var(--ring);padding:10px 12px}
+      tbody td{border:0;padding:6px 0;display:grid;grid-template-columns:110px 1fr;gap:4px 10px}
+      tbody td::before{content:attr(data-label);color:var(--dim);font-size:12px}
+      .scroll{padding:0 2px}
+    }
   </style>
 </head>
 <body>
@@ -127,7 +131,7 @@
       <h1>App Versions</h1>
       <span class="badge" id="updated-badge">Loading…</span>
     </div>
-    <div class="schema"><span class="chip">schema v<span id="schema-ver">1</span></span></div>
+    <div class="schema"><span class="chip">schema v<span id="schema-ver">2</span></span></div>
   </header>
 
   <main class="main">
@@ -146,12 +150,6 @@
       </select>
       <button class="btn ghost" id="toggle-density" title="Toggle dense rows">Dense</button>
       <div class="spacer"></div>
-      <div class="statbar">
-        <div class="stat" id="stat-apps">apps: 0</div>
-        <div class="stat" id="stat-stable">stable: 0</div>
-        <div class="stat" id="stat-beta">beta: 0</div>
-      </div>
-      <div class="right"></div>
       <button class="btn" id="btn-copy-json">Copy JSON URL</button>
       <button class="btn ok" id="btn-download-json">Download JSON</button>
     </div>
@@ -164,7 +162,7 @@
       <section class="panel" aria-label="Versions table">
         <div class="head">
           <div class="tray">
-            <span class="dim">Machine-readable endpoints:</span>
+            <span class="dim">Endpoints:</span>
             <div class="endpoint" id="ep-all">./index.html?format=json</div>
             <div class="endpoint" id="ep-compact">./index.html?format=json&latest=1</div>
             <div class="endpoint" id="ep-one">./index.html?format=json&app=target-tracker</div>
@@ -192,9 +190,8 @@
 
         <div class="foot">
           <strong>How to compare in your app</strong> — keep an integer <code class="mono">version_code</code> locally.
-          Fetch an endpoint and compare to the remote <code class="mono">code</code>. If remote &gt; local → prompt update.
-          Quick endpoints: <code class="mono">?format=code&amp;app=&lt;id&gt;</code> (returns just the integer),
-          or <code class="mono">?format=json&amp;app=&lt;id&gt;</code>.
+          Fetch an endpoint and compare to remote <code class="mono">code</code>. If remote &gt; local → prompt update.
+          Quick endpoint: <code class="mono">?format=code&amp;app=&lt;id&gt;</code> (returns just the integer).
         </div>
       </section>
     </section>
@@ -205,12 +202,27 @@
 <script id="versions-data" type="application/json">
 {
   "schemaVersion": 2,
-  "generated": "2025-10-17T14:00:00Z",
+  "generated": "2025-10-17T14:10:00Z",
   "contact": "Robin Doak (@skillerious)",
   "apps": [
     {
-      "id": "target-tracker",
-      "name": "Target Tracker",
+      "id": "version-tracker",
+      "name": "Version-Tracker",
+      "tracks": {
+        "stable": {
+          "version": "",
+          "code": 0,
+          "date": "",
+          "url": "https://github.com/skillerious/Version-Tracker/releases",
+          "download": "https://github.com/skillerious/Version-Tracker/releases/latest",
+          "notes": "Repo for this versions dashboard."
+        }
+      },
+      "history": []
+    },
+    {
+      "id": "torntargettracker",
+      "name": "TornTargetTracker",
       "tracks": {
         "stable": {
           "version": "2.6.3",
@@ -222,28 +234,17 @@
         }
       },
       "history": [
-        { "version": "2.6.0", "code": 20600, "date": "2025-10-14", "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.0" }
-      ]
-    },
-
-    {
-      "id": "version-tracker",
-      "name": "Version-Tracker",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Version-Tracker/releases",
-          "download": "https://github.com/skillerious/Version-Tracker/releases/latest",
-          "notes": "Repo for this versions dashboard. Fill when you tag a release."
+        {
+          "version": "2.6.0",
+          "code": 20600,
+          "date": "2025-10-14",
+          "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.0"
         }
-      },
-      "history": []
+      ]
     },
     {
       "id": "swift-image-uploader",
-      "name": "Swift Image Uploader",
+      "name": "Swift-Image-Uploader",
       "tracks": {
         "stable": {
           "version": "",
@@ -251,7 +252,7 @@
           "date": "",
           "url": "https://github.com/skillerious/Swift-Image-Uploader/releases",
           "download": "https://github.com/skillerious/Swift-Image-Uploader/releases/latest",
-          "notes": "Utilizes GitHub repo/token to host images."
+          "notes": "Utilizes GitHub repo/token to host and manage images."
         }
       },
       "history": []
@@ -333,7 +334,7 @@
     },
     {
       "id": "website",
-      "name": "Website (Markiva marketing site)",
+      "name": "Website",
       "tracks": {
         "stable": {
           "version": "",
@@ -341,7 +342,7 @@
           "date": "",
           "url": "https://github.com/skillerious/Website/releases",
           "download": "https://github.com/skillerious/Website/releases/latest",
-          "notes": "Markiva site."
+          "notes": "Markiva marketing site."
         }
       },
       "history": []
@@ -491,7 +492,7 @@
           "date": "",
           "url": "https://github.com/skillerious/skillerious/releases",
           "download": "https://github.com/skillerious/skillerious/releases/latest",
-          "notes": "Profile repo (general)."
+          "notes": "Profile repo."
         }
       },
       "history": []
@@ -540,183 +541,123 @@
         }
       },
       "history": []
-    },
-
-    {
-      "id": "icofetch",
-      "name": "IcoFetch",
-      "tracks": {
-        "stable": {
-          "version": "1.0.0",
-          "code": 10000,
-          "date": "2025-10-16",
-          "url": "https://github.com/your-org/IcoFetch/releases/tag/v1.0.0",
-          "download": "https://github.com/your-org/IcoFetch/releases/download/v1.0.0/IcoFetch-Setup.exe",
-          "notes": "Initial stable release."
-        }
-      },
-      "history": []
     }
-
   ]
 }
 </script>
-
 <!-- ========= END DATA ========= -->
 
 <script>
 (function(){
   const $ = (s, r=document)=>r.querySelector(s);
-  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
   const qs = new URLSearchParams(location.search);
 
-  const dataEl = $("#versions-data");
+  /* ===== Parse JSON safely ===== */
   let data;
-  function fail(msg){
-    document.body.innerHTML = '<pre class="json-out">'+JSON.stringify({error:msg},null,2)+'</pre>';
-    document.title="versions.json";
+  try { data = JSON.parse($("#versions-data").textContent.trim()); }
+  catch(e){
+    document.body.innerHTML = '<pre class="json-out">'+JSON.stringify({error:"Invalid JSON in #versions-data: "+e.message},null,2)+'</pre>';
+    document.title="versions.json"; return;
   }
-  try { data = JSON.parse(dataEl.textContent.trim()); }
-  catch(e){ return fail("Invalid JSON in #versions-data: "+e.message); }
 
-  /* ========= MACHINE OUTPUT MODES ========= */
+  /* ===== Machine-readable endpoints ===== */
   const format = (qs.get("format")||"").toLowerCase();
-  if (format) {
+  if (format){
     const appId = qs.get("app");
     const trackKey = (qs.get("track")||"stable").toLowerCase();
     const latestOnly = qs.get("latest")==="1";
+    const apps = data.apps||[];
 
-    const apps = data.apps || [];
-    function pickLatest(app){
-      if (!app.tracks) return null;
-      return app.tracks[trackKey] || app.tracks.stable || null;
-    }
+    const pickLatest = (app)=> app.tracks && (app.tracks[trackKey] || app.tracks.stable) || null;
 
-    if (format === "code") {
-      if (!appId) {
-        const lines = apps.map(a => {
-          const l = pickLatest(a);
-          return `${a.id}=${l? (l.code ?? 0) : 0}`;
-        }).join("\n");
-        document.body.innerHTML = '<pre class="json-out">'+lines+'</pre>';
-        document.title = "versions.txt";
-        return;
+    if (format === "code"){
+      if (!appId){
+        const lines = apps.map(a => `${a.id}=${(pickLatest(a)?.code ?? 0)}`).join("\\n");
+        document.body.innerHTML = '<pre class="json-out">'+lines+'</pre>'; document.title="versions.txt"; return;
       } else {
-        const app = apps.find(a => a.id===appId);
-        const l = app && pickLatest(app);
-        const only = String(l ? (l.code ?? 0) : 0);
-        document.body.innerHTML = '<pre class="json-out">'+only+'</pre>';
-        document.title = `${appId}.code`;
-        return;
+        const app = apps.find(a=>a.id===appId);
+        const code = String(app ? (pickLatest(app)?.code ?? 0) : 0);
+        document.body.innerHTML = '<pre class="json-out">'+code+'</pre>'; document.title=`${appId}.code`; return;
       }
     }
 
-    if (format === "txt" || format === "ini") {
-      function block(app){
-        const l = pickLatest(app) || {};
+    if (format === "txt" || format === "ini"){
+      const block = (app)=>{
+        const L = pickLatest(app) || {};
         if (format==="ini"){
           return `[${app.id}]
 name=${app.name||app.id}
 track=${app.tracks && (app.tracks[trackKey]? trackKey : "stable")}
-version=${l.version??""}
-code=${l.code??0}
-date=${l.date??""}
-url=${l.url??""}
-download=${l.download??""}\n`;
-        } else {
-          return `app=${app.id}
+version=${L.version??""}
+code=${L.code??0}
+date=${L.date??""}
+url=${L.url??""}
+download=${L.download??""}\\n`;
+        }
+        return `app=${app.id}
 name=${app.name||app.id}
 track=${app.tracks && (app.tracks[trackKey]? trackKey : "stable")}
-version=${l.version??""}
-code=${l.code??0}
-date=${l.date??""}
-url=${l.url??""}
-download=${l.download??""}\n`;
-        }
-      }
-
-      if (appId) {
+version=${L.version??""}
+code=${L.code??0}
+date=${L.date??""}
+url=${L.url??""}
+download=${L.download??""}\\n`;
+      };
+      if (appId){
         const app = apps.find(a=>a.id===appId);
-        const out = app ? block(app) : `error=app_not_found\napp=${appId}\n`;
-        document.body.innerHTML = '<pre class="json-out">'+out+'</pre>';
-        document.title = `${appId}.${format}`;
-        return;
-      } else if (latestOnly) {
-        const out = apps.map(a=>{
-          const l = pickLatest(a) || {};
-          return `${a.id} ${l.code??0} ${l.version??""}`;
-        }).join("\n");
-        document.body.innerHTML = '<pre class="json-out">'+out+'</pre>';
-        document.title = "latest.txt";
-        return;
-      } else {
-        const out = apps.map(block).join("\n");
-        document.body.innerHTML = '<pre class="json-out">'+out+'</pre>';
-        document.title = `versions.${format}`;
-        return;
+        const out = app ? block(app) : `error=app_not_found\\napp=${appId}\\n`;
+        document.body.innerHTML = '<pre class="json-out">'+out+'</pre>'; document.title=`${appId}.${format}`; return;
       }
+      if (latestOnly){
+        const out = apps.map(a=>`${a.id} ${(pickLatest(a)?.code??0)} ${(pickLatest(a)?.version??"")}`).join("\\n");
+        document.body.innerHTML = '<pre class="json-out">'+out+'</pre>'; document.title="latest.txt"; return;
+      }
+      const out = apps.map(block).join("\\n");
+      document.body.innerHTML = '<pre class="json-out">'+out+'</pre>'; document.title=`versions.${format}`; return;
     }
 
-    if (format === "json") {
-      if (latestOnly) {
-        const compact = {};
-        for (const a of apps) {
-          const l = pickLatest(a);
-          if (l) compact[a.id] = { version:l.version, code:l.code };
-        }
-        const out = { schemaVersion:data.schemaVersion, generated:data.generated, latest:compact };
-        document.body.innerHTML = '<pre class="json-out">'+JSON.stringify(out,null,2)+'</pre>';
-        document.title="versions.json";
-        return;
+    if (format === "json"){
+      if (latestOnly){
+        const latest = {};
+        for (const a of apps){ const L = pickLatest(a); if (L) latest[a.id] = {version:L.version, code:L.code}; }
+        const out = {schemaVersion:data.schemaVersion, generated:data.generated, latest};
+        document.body.innerHTML = '<pre class="json-out">'+JSON.stringify(out,null,2)+'</pre>'; document.title="versions.json"; return;
       }
-
-      if (appId) {
+      if (appId){
         const app = apps.find(a=>a.id===appId);
         if (!app){
-          const out = { error:"app_not_found", app:appId, available:apps.map(a=>a.id) };
-          document.body.innerHTML = '<pre class="json-out">'+JSON.stringify(out,null,2)+'</pre>';
-          document.title="versions.json";
-          return;
+          const out = {error:"app_not_found", app:appId, available:apps.map(a=>a.id)};
+          document.body.innerHTML = '<pre class="json-out">'+JSON.stringify(out,null,2)+'</pre>'; document.title="versions.json"; return;
         }
-        const l = (app.tracks && (app.tracks[trackKey] || app.tracks.stable)) || null;
-        const trackName = l ? (Object.entries(app.tracks).find(([k,v])=>v===l)||[trackKey])[0] : trackKey;
-        const out = { schemaVersion:data.schemaVersion, generated:data.generated, app:app.id, track:trackName, latest:l };
-        document.body.innerHTML = '<pre class="json-out">'+JSON.stringify(out,null,2)+'</pre>';
-        document.title=`${app.id}.json`;
-        return;
+        const L = pickLatest(app);
+        const trackName = L ? (Object.entries(app.tracks).find(([k,v])=>v===L)||[trackKey])[0] : trackKey;
+        const out = {schemaVersion:data.schemaVersion, generated:data.generated, app:app.id, track:trackName, latest:L};
+        document.body.innerHTML = '<pre class="json-out">'+JSON.stringify(out,null,2)+'</pre>'; document.title=`${app.id}.json`; return;
       }
-
-      document.body.innerHTML = '<pre class="json-out">'+JSON.stringify(data,null,2)+'</pre>';
-      document.title="versions.json";
-      return;
+      document.body.innerHTML = '<pre class="json-out">'+JSON.stringify(data,null,2)+'</pre>'; document.title="versions.json"; return;
     }
   }
 
-  /* ========= INTERACTIVE UI ========= */
+  /* ===== Interactive UI ===== */
   const updated = $("#updated-badge");
-  const schemaSpan = $("#schema-ver");
-  updated.textContent = (()=>{try{const dt=new Date(data.generated);if(!isNaN(dt)) return "UPDATED "+dt.toISOString().replace("T"," ").replace("Z"," UTC");}catch{}return "Updated: "+(data.generated||"–")})();
-  schemaSpan.textContent = String(data.schemaVersion||"1");
+  updated.textContent = (()=>{ try{ const dt=new Date(data.generated); if(!isNaN(dt)) return "UPDATED "+dt.toISOString().replace("T"," ").replace("Z"," UTC"); }catch{} return "Updated: "+(data.generated||"–") })();
+  $("#schema-ver").textContent = String(data.schemaVersion||"2");
 
-  const tbody = $("#apps-body");
-  const cards = $("#cards");
+  const qInput=$("#q"), trackSel=$("#track"), sortSel=$("#sort"), denseBtn=$("#toggle-density");
+  const cards=$("#cards"), tbody=$("#apps-body");
 
-  const qInput=$("#q"), trackSel=$("#track"), sortSel=$("#sort");
-  const denseBtn=$("#toggle-density");
-  const statApps=$("#stat-apps"), statStable=$("#stat-stable"), statBeta=$("#stat-beta");
-
-  function toRows() {
-    const list = [];
-    for (const app of (data.apps||[])) {
-      const tracks = app.tracks||{};
-      for (const [tName, latest] of Object.entries(tracks)) {
-        list.push({ app, track:tName, latest });
+  const toRows = ()=> {
+    const rows=[];
+    for (const app of (data.apps||[])){
+      const tracks=app.tracks||{};
+      for (const [tName, latest] of Object.entries(tracks)){
+        rows.push({app, track:tName, latest});
       }
     }
-    return list;
-  }
+    return rows;
+  };
 
-  function applyFilters(rows){
+  const applyFilters = (rows)=>{
     const q=(qInput.value||"").trim().toLowerCase();
     const t=(trackSel.value||"all").toLowerCase();
     let out = rows.filter(r=>{
@@ -728,38 +669,28 @@ download=${l.download??""}\n`;
       case "code_asc": out.sort((a,b)=>(a.latest.code??0)-(b.latest.code??0)); break;
       case "name_asc": out.sort((a,b)=>(a.app.name||a.app.id).localeCompare(b.app.name||b.app.id)); break;
       case "name_desc": out.sort((a,b)=>(b.app.name||b.app.id).localeCompare(a.app.name||a.app.id)); break;
-      default: out.sort((a,b) => (b.latest.code??0)-(a.latest.code??0));
+      default: out.sort((a,b)=>(b.latest.code??0)-(a.latest.code??0));
     }
     return out;
-  }
+  };
 
-  function renderStats(rows){
-    const appCount = new Set(rows.map(r=>r.app.id)).size;
-    const stable = rows.filter(r=>r.track==="stable").length;
-    const beta = rows.filter(r=>r.track==="beta").length;
-    statApps.textContent = `apps: ${appCount}`;
-    statStable.textContent = `stable: ${stable}`;
-    statBeta.textContent = `beta: ${beta}`;
-  }
-
-  function renderCards(rows){
+  const renderCards = (rows)=>{
     cards.innerHTML="";
-    // Build a map of the "preferred latest" per app (stable first, else highest code)
-    const map = new Map();
+    const map=new Map();
     for (const r of rows){
-      const cur = map.get(r.app.id);
-      if (!cur) { map.set(r.app.id, r); continue; }
-      if (cur.track!=="stable" && r.track==="stable") { map.set(r.app.id, r); continue; }
-      if ((r.latest.code??0) > (cur.latest.code??0)) map.set(r.app.id, r);
+      const cur=map.get(r.app.id);
+      if (!cur){ map.set(r.app.id,r); continue; }
+      if (cur.track!=="stable" && r.track==="stable"){ map.set(r.app.id,r); continue; }
+      if ((r.latest.code??0)>(cur.latest.code??0)) map.set(r.app.id,r);
     }
-    for (const r of Array.from(map.values())){
-      const div = document.createElement("div");
+    for (const r of map.values()){
+      const div=document.createElement("div");
       div.className="card";
-      div.setAttribute("data-app-id", r.app.id);
-      div.setAttribute("data-track", r.track);
-      div.setAttribute("data-version", r.latest.version||"");
-      div.setAttribute("data-code", String(r.latest.code??0));
-      div.innerHTML = `
+      div.setAttribute("data-app-id",r.app.id);
+      div.setAttribute("data-track",r.track);
+      div.setAttribute("data-version",r.latest.version||"");
+      div.setAttribute("data-code",String(r.latest.code??0));
+      div.innerHTML=`
         <h3>${r.app.name||r.app.id}</h3>
         <div class="kv">
           <div class="k">App ID</div><div class="v mono">${r.app.id}</div>
@@ -776,80 +707,70 @@ download=${l.download??""}\n`;
         </div>`;
       cards.appendChild(div);
     }
-  }
+  };
 
-  function renderTable(rows){
+  const renderTable = (rows)=>{
     tbody.innerHTML="";
     for (const r of rows){
-      const tr = document.createElement("tr");
-      tr.setAttribute("data-app-id", r.app.id);
-      tr.setAttribute("data-track", r.track);
-      tr.setAttribute("data-version", r.latest.version||"");
-      tr.setAttribute("data-code", String(r.latest.code??0));
+      const tr=document.createElement("tr");
+      tr.setAttribute("data-app-id",r.app.id);
+      tr.setAttribute("data-track",r.track);
+      tr.setAttribute("data-version",r.latest.version||"");
+      tr.setAttribute("data-code",String(r.latest.code??0));
 
-      const trackPill = `<span class="pill ${r.track==='beta'?'beta':'ok'}">${r.track}</span>`;
-      const links = [];
-      if (r.latest.url) links.push(`<a href="${r.latest.url}" target="_blank" rel="noopener">release</a>`);
-      if (r.latest.download) links.push(`<a href="${r.latest.download}" target="_blank" rel="noopener">download</a>`);
-      if (r.latest.notes) links.push(`<span title="${r.latest.notes}">notes</span>`);
+      const cells = [
+        {label:"App", html:`<strong>${r.app.name||r.app.id}</strong>`, cls:""},
+        {label:"App ID", html:r.app.id, cls:"id"},
+        {label:"Track", html:`<span class="pill ${r.track==='beta'?'beta':'ok'}">${r.track}</span>`, cls:""},
+        {label:"Version", html:(r.latest.version??"—"), cls:"mono"},
+        {label:"Code", html:(r.latest.code??"—"), cls:"mono"},
+        {label:"Date", html:(r.latest.date??"—"), cls:""},
+        {label:"Links", html:((r.latest.url? `<a href="${r.latest.url}" target="_blank" rel="noopener">release</a>`:"") + (r.latest.download? ` · <a href="${r.latest.download}" target="_blank" rel="noopener">download</a>`:"") + (r.latest.notes? ` · <span title="${r.latest.notes}">notes</span>`:"")), cls:"links"}
+      ];
 
-      tr.innerHTML = `
-        <td><strong>${r.app.name||r.app.id}</strong></td>
-        <td class="id">${r.app.id}</td>
-        <td>${trackPill}</td>
-        <td class="mono">${r.latest.version??"—"}</td>
-        <td class="mono">${r.latest.code??"—"}</td>
-        <td>${r.latest.date??"—"}</td>
-        <td class="links">${links.join(" · ")}</td>
-      `;
+      for (const c of cells){
+        const td=document.createElement("td");
+        td.setAttribute("data-label", c.label);
+        td.className=c.cls;
+        td.innerHTML=c.html;
+        tr.appendChild(td);
+      }
       tbody.appendChild(tr);
     }
-  }
+  };
 
-  function build(){
+  const build = ()=>{
     const rows = applyFilters(toRows());
-    renderStats(rows);
     renderCards(rows);
     renderTable(rows);
-    // Update endpoint examples with first app id
     const first = rows[0]?.app?.id || (data.apps?.[0]?.id) || "your-app-id";
     $("#ep-one").textContent = `./index.html?format=json&app=${first}`;
     $("#ep-code").textContent = `./index.html?format=code&app=${first}`;
-  }
-
-  qInput.addEventListener("input", build);
-  trackSel.addEventListener("change", build);
-  sortSel.addEventListener("change", build);
-  denseBtn.addEventListener("click", ()=>{
-    document.body.classList.toggle("dense");
-    const on = document.body.classList.contains("dense");
-    denseBtn.textContent = on ? "Comfortable" : "Dense";
-    document.querySelectorAll("tbody td, thead th").forEach(el=>el.style.padding = on ? "8px 12px" : "14px 16px");
-  });
+  };
 
   $("#btn-copy-json").addEventListener("click", async ()=>{
     const url = new URL(location.href); url.search="?format=json";
-    try{ await navigator.clipboard.writeText(url.toString());
-      const b=$("#btn-copy-json"); const t=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=t,1000);
-    }catch{ alert("Copy failed. " + url.toString()); }
+    try{ await navigator.clipboard.writeText(url.toString()); const b=$("#btn-copy-json"); const t=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=t,1000);}catch{ alert("Copy failed. "+url.toString()); }
   });
-
   $("#btn-download-json").addEventListener("click", ()=>{
     const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "versions.json";
-    a.click();
-    URL.revokeObjectURL(a.href);
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="versions.json"; a.click(); URL.revokeObjectURL(a.href);
   });
-
   $("#btn-copy-curl").addEventListener("click", async ()=>{
     const url = new URL(location.href); url.search="?format=json&latest=1";
     const cmd = `curl -fsSL "${url.toString()}"`;
-    try{ await navigator.clipboard.writeText(cmd);
-      const b=$("#btn-copy-curl"); const t=b.textContent; b.textContent="Copied"; setTimeout(()=>b.textContent=t,900);
-    }catch{ alert(cmd); }
+    try{ await navigator.clipboard.writeText(cmd); const b=$("#btn-copy-curl"); const t=b.textContent; b.textContent="Copied"; setTimeout(()=>b.textContent=t,900);}catch{ alert(cmd); }
   });
+  $("#toggle-density").addEventListener("click", ()=>{
+    document.body.classList.toggle("dense");
+    const on=document.body.classList.contains("dense");
+    $("#toggle-density").textContent = on ? "Comfortable" : "Dense";
+    document.querySelectorAll("tbody td, thead th").forEach(el=>el.style.padding = on ? "8px 12px" : "14px 16px");
+  });
+
+  $("#q").addEventListener("input", build);
+  $("#track").addEventListener("change", build);
+  $("#sort").addEventListener("change", build);
 
   build();
 })();
