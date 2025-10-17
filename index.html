@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>App Versions — Dashboard & Endpoint</title>
+  <link rel="alternate" type="application/json" href="?format=json">
+  <style>
+    :root{
+      --bg:#0b1116;--panel:#0f151c;--muted:#131b24;--muted2:#0f141a;
+      --text:#e8f0fb;--dim:#a9b7c8;--accent:#68d3ff;--accent2:#28c0a0;
+      --ok:#36d27a;--warn:#e8b84a;--beta:#74c3ff;--danger:#ff6b6b;
+      --ring:rgba(255,255,255,.07);--ring-2:rgba(255,255,255,.12);
+      --radius:16px;--shadow:0 12px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.03);
+      --mono:ui-monospace,SFMono-Regular,Consolas,Menlo,Monaco,monospace;
+      --sans:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Noto Sans",Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:
+       radial-gradient(1200px 800px at 10% -10%, #1a2230 0%, transparent 60%) no-repeat,
+       radial-gradient(900px 700px at 120% 10%, #13202b 0%, transparent 60%) no-repeat,
+       var(--bg);
+      color:var(--text);font-family:var(--sans);line-height:1.55;
+    }
+    .page{min-height:100vh;display:flex;flex-direction:column}
+    header.top{
+      padding:28px 24px 12px;display:grid;grid-template-columns:1fr auto;gap:16px;
+      align-items:center
+    }
+    .title-wrap{display:flex;align-items:center;gap:14px}
+    h1{margin:0;font-size:30px;letter-spacing:.2px}
+    .badge{
+      font-size:12px;padding:7px 10px;border-radius:999px;background:var(--muted);
+      color:var(--dim);border:1px solid var(--ring)
+    }
+    .schema{justify-self:end}
+    .schema .chip{
+      padding:7px 12px;border-radius:999px;background:rgba(104,211,255,.14);
+      color:#cfeeff;border:1px solid rgba(104,211,255,.28);font-size:12px
+    }
+
+    /* Main area: toolbar + content (cards + table) fills viewport */
+    .main{
+      flex:1;display:grid;grid-template-rows:auto 1fr;gap:14px;
+      padding:10px 24px 24px;
+    }
+    .toolbar{
+      display:flex;gap:10px;align-items:center;background:linear-gradient(180deg,var(--panel),var(--muted2));
+      border:1px solid var(--ring);border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:12px 12px 12px 14px
+    }
+    .toolbar .spacer{flex:1}
+    input[type="search"], select{
+      background:var(--muted);color:var(--text);border:1px solid var(--ring);
+      border-radius:10px;padding:10px 12px;outline:none;min-width:180px
+    }
+    select{min-width:130px}
+    .btn{
+      appearance:none;border:1px solid var(--ring);
+      background:linear-gradient(180deg,#1b2330,#121821);
+      color:var(--text);padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600
+    }
+    .btn:hover{border-color:var(--ring-2)}
+    .btn.ghost{background:transparent}
+    .btn.ok{background:linear-gradient(180deg,#13251b,#0f1a13);border-color:rgba(54,210,122,.35)}
+    .btn.warn{background:linear-gradient(180deg,#2a1f0f,#1a140b);border-color:rgba(232,184,74,.35)}
+
+    /* Content split: summary cards above a tall panel w/ sticky table */
+    .content{display:grid;grid-template-rows:auto 1fr;gap:14px;min-height:0}
+
+    /* cards */
+    .cards{
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+      gap:14px
+    }
+    .card{
+      background:linear-gradient(180deg,var(--panel),var(--muted2));
+      border:1px solid var(--ring);border-radius:14px;box-shadow:var(--shadow);
+      padding:14px;display:grid;gap:8px
+    }
+    .card h3{margin:0 0 6px 0}
+    .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13px}
+    .kv .k{color:var(--dim)}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--ring);font-size:12px}
+    .pill.ok{background:rgba(54,210,122,.12);color:#bff3d4;border-color:rgba(54,210,122,.28)}
+    .pill.beta{background:rgba(116,195,255,.12);color:#d8ecff;border-color:rgba(116,195,255,.28)}
+    .mono{font-family:var(--mono)}
+    .links a{color:var(--accent);text-decoration:none}
+    .links a:hover{text-decoration:underline}
+
+    /* table panel fills remaining viewport height */
+    .panel{
+      background:linear-gradient(180deg,var(--panel),var(--muted2));
+      border:1px solid var(--ring);border-radius:var(--radius);box-shadow:var(--shadow);
+      display:grid;grid-template-rows:auto 1fr auto;min-height:0
+    }
+    .panel .head{padding:12px 16px;border-bottom:1px solid var(--ring)}
+    .scroll{overflow:auto;min-height:0}
+    table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
+    thead th{
+      position:sticky;top:0;background:linear-gradient(180deg,var(--panel),var(--muted2));
+      text-align:left;padding:14px 16px;color:var(--dim);font-weight:600;border-bottom:1px solid var(--ring);z-index:1
+    }
+    tbody td{padding:14px 16px;border-bottom:1px solid var(--ring)}
+    tbody tr:hover td{background:rgba(255,255,255,.02)}
+    .id{font-family:var(--mono);color:var(--dim)}
+    .foot{padding:12px 16px;color:var(--dim);border-top:1px dashed var(--ring);font-size:12px}
+
+    /* endpoints tray */
+    .tray{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 16px}
+    .endpoint{
+      background:var(--muted);border:1px solid var(--ring);border-radius:10px;
+      padding:10px 12px;font-family:var(--mono);color:var(--dim);font-size:12px;overflow:auto
+    }
+    pre.json-out{margin:0;padding:20px;background:#0c0f13;color:#e6f1ff;font-family:var(--mono);font-size:13px}
+    .statbar{display:flex;gap:10px;flex-wrap:wrap}
+    .stat{background:var(--muted);border:1px solid var(--ring);border-radius:999px;padding:6px 10px;font-size:12px;color:var(--dim)}
+    .right{margin-left:auto}
+  </style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <div class="title-wrap">
+      <h1>App Versions</h1>
+      <span class="badge" id="updated-badge">Loading…</span>
+    </div>
+    <div class="schema"><span class="chip">schema v<span id="schema-ver">1</span></span></div>
+  </header>
+
+  <main class="main">
+    <div class="toolbar" role="region" aria-label="Filters">
+      <input id="q" type="search" placeholder="Search apps…" aria-label="Search apps">
+      <select id="track">
+        <option value="all">All tracks</option>
+        <option value="stable" selected>Stable</option>
+        <option value="beta">Beta</option>
+      </select>
+      <select id="sort">
+        <option value="code_desc" selected>Newest by code ↓</option>
+        <option value="code_asc">Oldest by code ↑</option>
+        <option value="name_asc">Name A–Z</option>
+        <option value="name_desc">Name Z–A</option>
+      </select>
+      <button class="btn ghost" id="toggle-density" title="Toggle dense rows">Dense</button>
+      <div class="spacer"></div>
+      <div class="statbar">
+        <div class="stat" id="stat-apps">apps: 0</div>
+        <div class="stat" id="stat-stable">stable: 0</div>
+        <div class="stat" id="stat-beta">beta: 0</div>
+      </div>
+      <div class="right"></div>
+      <button class="btn" id="btn-copy-json">Copy JSON URL</button>
+      <button class="btn ok" id="btn-download-json">Download JSON</button>
+    </div>
+
+    <section class="content">
+      <!-- Summary cards (latest per app / preferred track) -->
+      <div class="cards" id="cards"></div>
+
+      <!-- Full table -->
+      <section class="panel" aria-label="Versions table">
+        <div class="head">
+          <div class="tray">
+            <span class="dim">Machine-readable endpoints:</span>
+            <div class="endpoint" id="ep-all">./index.html?format=json</div>
+            <div class="endpoint" id="ep-compact">./index.html?format=json&latest=1</div>
+            <div class="endpoint" id="ep-one">./index.html?format=json&app=target-tracker</div>
+            <div class="endpoint" id="ep-code">./index.html?format=code&app=target-tracker</div>
+            <button class="btn ghost" id="btn-copy-curl" title="Copy curl command">Copy curl</button>
+          </div>
+        </div>
+
+        <div class="scroll">
+          <table id="apps-table">
+            <thead>
+              <tr>
+                <th style="width:22%">App</th>
+                <th>App ID</th>
+                <th style="width:12%">Track</th>
+                <th style="width:12%">Version</th>
+                <th style="width:12%">Code</th>
+                <th style="width:16%">Date</th>
+                <th>Links</th>
+              </tr>
+            </thead>
+            <tbody id="apps-body"></tbody>
+          </table>
+        </div>
+
+        <div class="foot">
+          <strong>How to compare in your app</strong> — keep an integer <code class="mono">version_code</code> locally.
+          Fetch an endpoint and compare to the remote <code class="mono">code</code>. If remote &gt; local → prompt update.
+          Quick endpoints: <code class="mono">?format=code&amp;app=&lt;id&gt;</code> (returns just the integer),
+          or <code class="mono">?format=json&amp;app=&lt;id&gt;</code>.
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<!-- ========= DATA (VALID JSON; NO COMMENTS) ========= -->
+<script id="versions-data" type="application/json">
+{
+  "schemaVersion": 2,
+  "generated": "2025-10-17T13:55:00Z",
+  "contact": "Edit me: your name or link",
+  "apps": [
+    {
+      "id": "target-tracker",
+      "name": "Target Tracker",
+      "tracks": {
+        "stable": {
+          "version": "2.6.1",
+          "code": 20601,
+          "date": "2025-10-16",
+          "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.1",
+          "download": "https://github.com/skillerious/TornTargetTracker/releases/download/V2.6.1/Target.Tracker.Installer.exe",
+          "notes": "Settings dialog redesign, status color upgrades, fixes."
+        }
+      },
+      "history": [
+        {
+          "version": "2.6.0",
+          "code": 20600,
+          "date": "2025-10-14",
+          "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.0"
+        }
+      ]
+    },
+    {
+      "id": "icofetch",
+      "name": "IcoFetch",
+      "tracks": {
+        "stable": {
+          "version": "1.0.0",
+          "code": 10000,
+          "date": "2025-10-16",
+          "url": "https://github.com/your-org/IcoFetch/releases/tag/v1.0.0",
+          "download": "https://github.com/your-org/IcoFetch/releases/download/v1.0.0/IcoFetch-Setup.exe",
+          "notes": "Initial stable release."
+        }
+      },
+      "history": []
+    }
+  ]
+}
+</script>
+<!-- ========= END DATA ========= -->
+
+<script>
+(function(){
+  const $ = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+  const qs = new URLSearchParams(location.search);
+
+  const dataEl = $("#versions-data");
+  let data;
+  function fail(msg){
+    document.body.innerHTML = '<pre class="json-out">'+JSON.stringify({error:msg},null,2)+'</pre>';
+    document.title="versions.json";
+  }
+  try { data = JSON.parse(dataEl.textContent.trim()); }
+  catch(e){ return fail("Invalid JSON in #versions-data: "+e.message); }
+
+  /* ========= MACHINE OUTPUT MODES ========= */
+  const format = (qs.get("format")||"").toLowerCase();
+  if (format) {
+    const appId = qs.get("app");
+    const trackKey = (qs.get("track")||"stable").toLowerCase();
+    const latestOnly = qs.get("latest")==="1";
+
+    const apps = data.apps || [];
+    function pickLatest(app){
+      if (!app.tracks) return null;
+      return app.tracks[trackKey] || app.tracks.stable || null;
+    }
+
+    if (format === "code") {
+      if (!appId) {
+        const lines = apps.map(a => {
+          const l = pickLatest(a);
+          return `${a.id}=${l? (l.code ?? 0) : 0}`;
+        }).join("\n");
+        document.body.innerHTML = '<pre class="json-out">'+lines+'</pre>';
+        document.title = "versions.txt";
+        return;
+      } else {
+        const app = apps.find(a => a.id===appId);
+        const l = app && pickLatest(app);
+        const only = String(l ? (l.code ?? 0) : 0);
+        document.body.innerHTML = '<pre class="json-out">'+only+'</pre>';
+        document.title = `${appId}.code`;
+        return;
+      }
+    }
+
+    if (format === "txt" || format === "ini") {
+      function block(app){
+        const l = pickLatest(app) || {};
+        if (format==="ini"){
+          return `[${app.id}]
+name=${app.name||app.id}
+track=${app.tracks && (app.tracks[trackKey]? trackKey : "stable")}
+version=${l.version??""}
+code=${l.code??0}
+date=${l.date??""}
+url=${l.url??""}
+download=${l.download??""}\n`;
+        } else {
+          return `app=${app.id}
+name=${app.name||app.id}
+track=${app.tracks && (app.tracks[trackKey]? trackKey : "stable")}
+version=${l.version??""}
+code=${l.code??0}
+date=${l.date??""}
+url=${l.url??""}
+download=${l.download??""}\n`;
+        }
+      }
+
+      if (appId) {
+        const app = apps.find(a=>a.id===appId);
+        const out = app ? block(app) : `error=app_not_found\napp=${appId}\n`;
+        document.body.innerHTML = '<pre class="json-out">'+out+'</pre>';
+        document.title = `${appId}.${format}`;
+        return;
+      } else if (latestOnly) {
+        const out = apps.map(a=>{
+          const l = pickLatest(a) || {};
+          return `${a.id} ${l.code??0} ${l.version??""}`;
+        }).join("\n");
+        document.body.innerHTML = '<pre class="json-out">'+out+'</pre>';
+        document.title = "latest.txt";
+        return;
+      } else {
+        const out = apps.map(block).join("\n");
+        document.body.innerHTML = '<pre class="json-out">'+out+'</pre>';
+        document.title = `versions.${format}`;
+        return;
+      }
+    }
+
+    if (format === "json") {
+      if (latestOnly) {
+        const compact = {};
+        for (const a of apps) {
+          const l = pickLatest(a);
+          if (l) compact[a.id] = { version:l.version, code:l.code };
+        }
+        const out = { schemaVersion:data.schemaVersion, generated:data.generated, latest:compact };
+        document.body.innerHTML = '<pre class="json-out">'+JSON.stringify(out,null,2)+'</pre>';
+        document.title="versions.json";
+        return;
+      }
+
+      if (appId) {
+        const app = apps.find(a=>a.id===appId);
+        if (!app){
+          const out = { error:"app_not_found", app:appId, available:apps.map(a=>a.id) };
+          document.body.innerHTML = '<pre class="json-out">'+JSON.stringify(out,null,2)+'</pre>';
+          document.title="versions.json";
+          return;
+        }
+        const l = (app.tracks && (app.tracks[trackKey] || app.tracks.stable)) || null;
+        const trackName = l ? (Object.entries(app.tracks).find(([k,v])=>v===l)||[trackKey])[0] : trackKey;
+        const out = { schemaVersion:data.schemaVersion, generated:data.generated, app:app.id, track:trackName, latest:l };
+        document.body.innerHTML = '<pre class="json-out">'+JSON.stringify(out,null,2)+'</pre>';
+        document.title=`${app.id}.json`;
+        return;
+      }
+
+      document.body.innerHTML = '<pre class="json-out">'+JSON.stringify(data,null,2)+'</pre>';
+      document.title="versions.json";
+      return;
+    }
+  }
+
+  /* ========= INTERACTIVE UI ========= */
+  const updated = $("#updated-badge");
+  const schemaSpan = $("#schema-ver");
+  updated.textContent = (()=>{try{const dt=new Date(data.generated);if(!isNaN(dt)) return "UPDATED "+dt.toISOString().replace("T"," ").replace("Z"," UTC");}catch{}return "Updated: "+(data.generated||"–")})();
+  schemaSpan.textContent = String(data.schemaVersion||"1");
+
+  const tbody = $("#apps-body");
+  const cards = $("#cards");
+
+  const qInput=$("#q"), trackSel=$("#track"), sortSel=$("#sort");
+  const denseBtn=$("#toggle-density");
+  const statApps=$("#stat-apps"), statStable=$("#stat-stable"), statBeta=$("#stat-beta");
+
+  function toRows() {
+    const list = [];
+    for (const app of (data.apps||[])) {
+      const tracks = app.tracks||{};
+      for (const [tName, latest] of Object.entries(tracks)) {
+        list.push({ app, track:tName, latest });
+      }
+    }
+    return list;
+  }
+
+  function applyFilters(rows){
+    const q=(qInput.value||"").trim().toLowerCase();
+    const t=(trackSel.value||"all").toLowerCase();
+    let out = rows.filter(r=>{
+      const hit = !q || (r.app.id.toLowerCase().includes(q) || (r.app.name||"").toLowerCase().includes(q) || (r.latest.version||"").toLowerCase().includes(q));
+      const tk = t==="all" || r.track===t;
+      return hit && tk;
+    });
+    switch (sortSel.value){
+      case "code_asc": out.sort((a,b)=>(a.latest.code??0)-(b.latest.code??0)); break;
+      case "name_asc": out.sort((a,b)=>(a.app.name||a.app.id).localeCompare(b.app.name||b.app.id)); break;
+      case "name_desc": out.sort((a,b)=>(b.app.name||b.app.id).localeCompare(a.app.name||a.app.id)); break;
+      default: out.sort((a,b) => (b.latest.code??0)-(a.latest.code??0));
+    }
+    return out;
+  }
+
+  function renderStats(rows){
+    const appCount = new Set(rows.map(r=>r.app.id)).size;
+    const stable = rows.filter(r=>r.track==="stable").length;
+    const beta = rows.filter(r=>r.track==="beta").length;
+    statApps.textContent = `apps: ${appCount}`;
+    statStable.textContent = `stable: ${stable}`;
+    statBeta.textContent = `beta: ${beta}`;
+  }
+
+  function renderCards(rows){
+    cards.innerHTML="";
+    // Build a map of the "preferred latest" per app (stable first, else highest code)
+    const map = new Map();
+    for (const r of rows){
+      const cur = map.get(r.app.id);
+      if (!cur) { map.set(r.app.id, r); continue; }
+      if (cur.track!=="stable" && r.track==="stable") { map.set(r.app.id, r); continue; }
+      if ((r.latest.code??0) > (cur.latest.code??0)) map.set(r.app.id, r);
+    }
+    for (const r of Array.from(map.values())){
+      const div = document.createElement("div");
+      div.className="card";
+      div.setAttribute("data-app-id", r.app.id);
+      div.setAttribute("data-track", r.track);
+      div.setAttribute("data-version", r.latest.version||"");
+      div.setAttribute("data-code", String(r.latest.code??0));
+      div.innerHTML = `
+        <h3>${r.app.name||r.app.id}</h3>
+        <div class="kv">
+          <div class="k">App ID</div><div class="v mono">${r.app.id}</div>
+          <div class="k">Track</div><div class="v"><span class="pill ${r.track==='beta'?'beta':'ok'}">${r.track}</span></div>
+          <div class="k">Version</div><div class="v mono">${r.latest.version??"—"}</div>
+          <div class="k">Code</div><div class="v mono">${r.latest.code??"—"}</div>
+          <div class="k">Date</div><div class="v">${r.latest.date??"—"}</div>
+          <div class="k">Links</div>
+          <div class="v links">
+            ${(r.latest.url? `<a target="_blank" rel="noopener" href="${r.latest.url}">release</a>`:"")}
+            ${(r.latest.download? ` · <a target="_blank" rel="noopener" href="${r.latest.download}">download</a>`:"")}
+            ${(r.latest.notes? ` · <span title="${r.latest.notes}">notes</span>`:"")}
+          </div>
+        </div>`;
+      cards.appendChild(div);
+    }
+  }
+
+  function renderTable(rows){
+    tbody.innerHTML="";
+    for (const r of rows){
+      const tr = document.createElement("tr");
+      tr.setAttribute("data-app-id", r.app.id);
+      tr.setAttribute("data-track", r.track);
+      tr.setAttribute("data-version", r.latest.version||"");
+      tr.setAttribute("data-code", String(r.latest.code??0));
+
+      const trackPill = `<span class="pill ${r.track==='beta'?'beta':'ok'}">${r.track}</span>`;
+      const links = [];
+      if (r.latest.url) links.push(`<a href="${r.latest.url}" target="_blank" rel="noopener">release</a>`);
+      if (r.latest.download) links.push(`<a href="${r.latest.download}" target="_blank" rel="noopener">download</a>`);
+      if (r.latest.notes) links.push(`<span title="${r.latest.notes}">notes</span>`);
+
+      tr.innerHTML = `
+        <td><strong>${r.app.name||r.app.id}</strong></td>
+        <td class="id">${r.app.id}</td>
+        <td>${trackPill}</td>
+        <td class="mono">${r.latest.version??"—"}</td>
+        <td class="mono">${r.latest.code??"—"}</td>
+        <td>${r.latest.date??"—"}</td>
+        <td class="links">${links.join(" · ")}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  function build(){
+    const rows = applyFilters(toRows());
+    renderStats(rows);
+    renderCards(rows);
+    renderTable(rows);
+    // Update endpoint examples with first app id
+    const first = rows[0]?.app?.id || (data.apps?.[0]?.id) || "your-app-id";
+    $("#ep-one").textContent = `./index.html?format=json&app=${first}`;
+    $("#ep-code").textContent = `./index.html?format=code&app=${first}`;
+  }
+
+  qInput.addEventListener("input", build);
+  trackSel.addEventListener("change", build);
+  sortSel.addEventListener("change", build);
+  denseBtn.addEventListener("click", ()=>{
+    document.body.classList.toggle("dense");
+    const on = document.body.classList.contains("dense");
+    denseBtn.textContent = on ? "Comfortable" : "Dense";
+    document.querySelectorAll("tbody td, thead th").forEach(el=>el.style.padding = on ? "8px 12px" : "14px 16px");
+  });
+
+  $("#btn-copy-json").addEventListener("click", async ()=>{
+    const url = new URL(location.href); url.search="?format=json";
+    try{ await navigator.clipboard.writeText(url.toString());
+      const b=$("#btn-copy-json"); const t=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=t,1000);
+    }catch{ alert("Copy failed. " + url.toString()); }
+  });
+
+  $("#btn-download-json").addEventListener("click", ()=>{
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "versions.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  $("#btn-copy-curl").addEventListener("click", async ()=>{
+    const url = new URL(location.href); url.search="?format=json&latest=1";
+    const cmd = `curl -fsSL "${url.toString()}"`;
+    try{ await navigator.clipboard.writeText(cmd);
+      const b=$("#btn-copy-curl"); const t=b.textContent; b.textContent="Copied"; setTimeout(()=>b.textContent=t,900);
+    }catch{ alert(cmd); }
+  });
+
+  build();
+})();
+</script>
+</body>
+</html>
