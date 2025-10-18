@@ -542,3 +542,32 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 pre.json-out{
   margin:0;padding:20px;background:#0c0f13;color:#e6f1ff;font-family:var(--mono);font-size:13px
 }
+/* === Mobile overflow guards === */
+
+/* 1) Never allow horizontal scrolling */
+html, body, .page {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* 2) Clip decorative glows in the hero (they're positioned outside the box) */
+.top.hero .hero-inner {
+  overflow: hidden; /* prevent glow from causing side-scroll */
+}
+
+/* 3) Isolate paint for sections that use absolute children (cheap, safe) */
+.toolbar,
+.endpoints,
+.ep-code,
+.footer-card {
+  contain: paint;
+}
+
+/* Optional: make any long pre/code blocks wrap rather than push width */
+pre, code {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
