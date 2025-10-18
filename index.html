@@ -3,35 +3,70 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
   <title>App Versions — Skillerious (Robin Doak)</title>
   <meta name="description" content="Version dashboard & machine-readable endpoints for Skillerious — Robin Doak apps." />
+
+  <!-- Site icon -->
+  <link rel="icon" href="assets/icon.ico" sizes="any" />
+
+  <!-- Alternate machine endpoints -->
   <link rel="alternate" type="application/json" href="?format=json" />
+  <link rel="alternate" type="application/json" href="repoversion.json" />
+
   <!-- CSP: no inline JS/CSS; everything loaded from local files -->
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self';">
+
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 <div class="page">
-  <!-- ===== Header ===== -->
-  <header class="top">
-    <div class="brand">
-      <div class="logo"><img src="assets/icon.ico" alt="Skillerious icon" /></div>
-      <div class="title-wrap">
-        <h1>App Versions</h1>
-        <div class="ownerline">
-          <a class="owner-tag" href="https://github.com/skillerious" target="_blank" rel="noopener">
-            <span class="owner-name">Skillerious</span> — <span>Robin Doak</span>
-          </a>
-          <span class="updated-pill">
-            <span class="dot"></span><span id="updated-badge">Updated…</span>
-          </span>
+  <!-- ===== Header (Premium Hero) ===== -->
+  <header class="top hero">
+    <div class="hero-inner">
+      <div class="brand">
+        <div class="logo-wrap">
+          <div class="logo ring">
+            <!-- Use the file present in /assets -->
+            <img class="logo-img" src="assets/icon.ico" alt="Skillerious mark" decoding="async" />
+          </div>
+        </div>
+
+        <div class="title-wrap">
+          <h1 class="hero-title"><span>Skillerious Version Tracker</span></h1>
+
+          <div class="ownerline">
+            <a class="owner-tag" href="https://github.com/skillerious" target="_blank" rel="noopener">
+              <span class="owner-name">Robin Doak</span>
+            </a>
+            <span class="updated-pill">
+              <span class="dot dot-pulse"></span><span id="updated-badge">Updated…</span>
+            </span>
+          </div>
+
+          <!-- Hero chips row -->
+          <div class="hero-chips">
+            <span class="chip spec">Spec <strong>v<span id="schema-ver">2</span></strong>
+              <small>• Endpoints: json / txt / ini / code</small></span>
+
+            <span class="chip stat" title="Total apps listed">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <span><strong id="app-count">0</strong> apps</span>
+            </span>
+
+            <a class="chip link" href="?format=json" target="_blank" rel="noopener" title="Open machine JSON">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M14 3h7v7m-1-6l-9 9M5 5h5M5 5v14a2 2 0 002 2h14"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Open JSON
+            </a>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="schema">
-      <span class="chip">Spec <strong>v<span id="schema-ver">2</span></strong>
-        <small>• Endpoints: json / txt / ini / code</small></span>
     </div>
   </header>
 
@@ -76,7 +111,7 @@
         </div>
       </div>
 
-      <!-- Endpoint rows: buttons are fixed on the right and do NOT scroll with the text -->
+      <!-- Endpoint rows -->
       <div class="ep-row">
         <div class="ep-code" id="ep-all">
           <div class="ep-scroll"><span class="path">./index.html?format=json</span></div>
@@ -169,13 +204,13 @@
         <table id="apps-table">
           <thead>
             <tr>
-              <th style="width:26%">App</th>
-              <th>App ID</th>
-              <th style="width:12%">Track</th>
-              <th style="width:12%">Version</th>
-              <th style="width:12%">Code</th>
-              <th style="width:16%">Date</th>
-              <th>Links</th>
+              <th class="col-app">App</th>
+              <th class="col-id">App ID</th>
+              <th class="col-track">Track</th>
+              <th class="col-version">Version</th>
+              <th class="col-code">Code</th>
+              <th class="col-date">Date</th>
+              <th class="col-links">Links</th>
             </tr>
           </thead>
           <tbody id="apps-body"></tbody>
@@ -186,342 +221,58 @@
     <!-- Mobile list -->
     <ul class="m-list" id="m-list" aria-label="Versions list (mobile)"></ul>
   </main>
+
+  <!-- ===== Notice Footer ===== -->
+  <footer class="footer" role="contentinfo" aria-label="Site notice">
+    <div class="footer-card">
+      <!-- header row -->
+      <div class="foot-head">
+        <div class="foot-title">
+          <span class="foot-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+              <path d="M12 8h.01M11 12h2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="foot-heading">Version Service</span>
+          <span class="badge">Informational</span>
+        </div>
+
+        <nav class="foot-actions" aria-label="Machine-readable endpoints">
+          <a class="foot-chip" href="?format=json">JSON</a>
+          <a class="foot-chip" href="?format=txt">TXT</a>
+          <a class="foot-chip" href="?format=ini">INI</a>
+          <a class="foot-chip" href="?format=code">CODE</a>
+        </nav>
+      </div>
+
+      <!-- content -->
+      <div class="foot-grid">
+        <div class="foot-col">
+          <p>
+            This dashboard is for information only. Applications developed by
+            <span class="mono">Skillerious (Robin Doak)</span> read the endpoints above to check
+            current versions and codes, and then decide inside the app whether to prompt or perform an update.
+          </p>
+        </div>
+        <div class="foot-col">
+          <ul class="foot-list">
+            <li><strong>No push updates:</strong> this site does not install software.</li>
+            <li><strong>Public metadata:</strong> versions, release links, and integer codes.</li>
+            <li><strong>Client-driven:</strong> update logic runs in each app.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- meta line -->
+      <div class="foot-meta">
+        <span>Made by <a class="foot-link" href="https://github.com/skillerious" target="_blank" rel="noopener">Robin Doak</a></span>
+      </div>
+    </div>
+  </footer>
 </div>
 
-<!-- =================== DATA (VALID JSON; NO COMMENTS) =================== -->
-<script id="versions-data" type="application/json">
-{
-  "schemaVersion": 2,
-  "generated": "2025-10-18T11:19:46Z",
-  "contact": "Skillerious — Robin Doak",
-  "apps": [
-    {
-      "id": "target-tracker",
-      "name": "TornTargetTracker",
-      "tracks": {
-        "stable": {
-          "version": "2.6.1",
-          "code": 20601,
-          "date": "2025-10-16",
-          "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.1",
-          "download": "https://github.com/skillerious/TornTargetTracker/releases/download/V2.6.1/Target.Tracker.Installer.exe",
-          "notes": "Settings dialog redesign, status color upgrades, fixes."
-        }
-      },
-      "history": [
-        {
-          "version": "2.6.0",
-          "code": 20600,
-          "date": "2025-10-14",
-          "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.0"
-        }
-      ]
-    },
-    {
-      "id": "swift-image-uploader",
-      "name": "Swift-Image-Uploader",
-      "tracks": {
-        "stable": {
-          "version": "2.8.8",
-          "code": 20808,
-          "date": "2025-10-18",
-          "url": "https://github.com/skillerious/Swift-Image-Uploader/releases",
-          "download": "https://github.com/skillerious/Swift-Image-Uploader/releases/latest",
-          "notes": "Utilizes GitHub repo/token to host and manage images."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "swiftformatter",
-      "name": "SwiftFormatter",
-      "tracks": {
-        "stable": {
-          "version": "2.4.8",
-          "code": 2048,
-          "date": "2025-10-18",
-          "url": "https://github.com/skillerious/SwiftFormatter/releases",
-          "download": "https://github.com/skillerious/SwiftFormatter/releases/latest",
-          "notes": "Professional USB drive formatter."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "loopback-recorder",
-      "name": "Loopback-Recorder",
-      "tracks": {
-        "stable": {
-          "version": "1.0.0",
-          "code": 10000,
-          "date": "2025-10-18",
-          "url": "https://github.com/skillerious/Loopback-Recorder/releases",
-          "download": "https://github.com/skillerious/Loopback-Recorder/releases/latest",
-          "notes": "Record Windows system audio."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "starfield-iddb",
-      "name": "Starfield-IDDB",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Starfield-IDDB/releases",
-          "download": "https://github.com/skillerious/Starfield-IDDB/releases/latest",
-          "notes": "Console command database + JSON editor."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "cleanname",
-      "name": "CleanName",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/CleanName/releases",
-          "download": "https://github.com/skillerious/CleanName/releases/latest",
-          "notes": "File re-namer with loads of features."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "modninja",
-      "name": "ModNinja",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/ModNinja/releases",
-          "download": "https://github.com/skillerious/ModNinja/releases/latest",
-          "notes": "View and export Vortex mod lists."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "website",
-      "name": "Website",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Website/releases",
-          "download": "https://github.com/skillerious/Website/releases/latest",
-          "notes": "Markiva marketing site."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "ytaudio",
-      "name": "YTAudio",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/YTAudio/releases",
-          "download": "https://github.com/skillerious/YTAudio/releases/latest",
-          "notes": "Download audio from YouTube URLs."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "markiva",
-      "name": "Markiva",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Markiva/releases",
-          "download": "https://github.com/skillerious/Markiva/releases/latest",
-          "notes": "Dark-themed, offline-first Markdown editor."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "falloutsheltersge",
-      "name": "FalloutShelterSGE",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/FalloutShelterSGE/releases",
-          "download": "https://github.com/skillerious/FalloutShelterSGE/releases/latest",
-          "notes": "Save file editor for Fallout Shelter."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "robindoak",
-      "name": "RobinDoak",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/RobinDoak/releases",
-          "download": "https://github.com/skillerious/RobinDoak/releases/latest",
-          "notes": "Personal site repo."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "swifthelp",
-      "name": "SwiftHelp",
-      "tracks": {
-        "stable": {
-          "version": "1.2.0",
-          "code": 1200,
-          "date": "2025-10-18",
-          "url": "https://github.com/skillerious/SwiftHelp/releases/tag/SiftHelp-Help-V1.2",
-          "download": "https://github.com/skillerious/SwiftHelp/releases/latest",
-          "notes": "Electron-based help-authoring tool."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "webdownloader",
-      "name": "WebDownloader",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/WebDownloader/releases",
-          "download": "https://github.com/skillerious/WebDownloader/releases/latest",
-          "notes": "Website downloading tool."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "tornchainer",
-      "name": "TornChainer",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/TornChainer/releases",
-          "download": "https://github.com/skillerious/TornChainer/releases/latest",
-          "notes": "Store chaining targets for Torn."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "swiftsfv",
-      "name": "SwiftSFV",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/SwiftSFV/releases",
-          "download": "https://github.com/skillerious/SwiftSFV/releases/latest",
-          "notes": "File verification utility."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "github-follower-tracker",
-      "name": "Github-Follower-Tracker",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Github-Follower-Tracker/releases",
-          "download": "https://github.com/skillerious/Github-Follower-Tracker/releases/latest",
-          "notes": "Follower tracking and analytics."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "skillerious",
-      "name": "skillerious",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/skillerious/releases",
-          "download": "https://github.com/skillerious/skillerious/releases/latest",
-          "notes": "Profile repo."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "age-converter-torn",
-      "name": "Age-Converter-Torn-",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Age-Converter-Torn-/releases",
-          "download": "https://github.com/skillerious/Age-Converter-Torn-/releases/latest",
-          "notes": "Userscript to convert Torn age in days."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "fixelate-pro",
-      "name": "Fixelate-Pro",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Fixelate-Pro/releases",
-          "download": "https://github.com/skillerious/Fixelate-Pro/releases/latest",
-          "notes": "All-round image editor."
-        }
-      },
-      "history": []
-    },
-    {
-      "id": "snk",
-      "name": "snk (fork)",
-      "tracks": {
-        "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/snk/releases",
-          "download": "https://github.com/skillerious/snk/releases/latest",
-          "notes": "Fork of Platane/snk."
-        }
-      },
-      "history": []
-    }
-  ]
-}
-</script>
-<!-- =================== END DATA =================== -->
-
+<!-- No inline data; app.js loads repoversion.json -->
 <script src="app.js" defer></script>
 </body>
 </html>
