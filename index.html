@@ -341,95 +341,90 @@
 
 <!-- About modal -->
 <div class="about-modal" id="about" aria-hidden="true" role="dialog" aria-modal="true">
-  <div class="about-card" id="about-card" role="document">
+  <div class="about-card" role="document">
     <header class="about-head">
-      <div class="about-title">
-        <span class="about-icon" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
-            <path d="M12 8h.01M11 12h2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </span>
-        <div class="about-title-text">
-          <h2>Skillerious Version Tracker</h2>
-          <p class="about-sub">Machine-readable version service for Skillerious apps</p>
-        </div>
+      <div class="about-badge" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 8h.01M11 12h2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
       </div>
-      <button class="about-close" id="about-close" aria-label="Close">✕</button>
+      <div class="about-title">
+        <strong>Skillerious Version Tracker</strong>
+        <small>Machine-readable version service for Skillerious apps</small>
+      </div>
+      <button class="about-close" id="about-close" type="button" aria-label="Close about dialog">
+        <span aria-hidden="true">&times;</span>
+      </button>
     </header>
 
-    <!-- Stat tiles -->
-    <section class="about-stats" aria-label="Service stats">
-      <div class="stat-card">
-        <div class="stat-label">Schema</div>
-        <div class="stat-value" id="about-schema">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Generated (UTC)</div>
-        <div class="stat-value" id="about-generated">—</div>
-        <div class="stat-note" id="about-generated-ago">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Apps</div>
-        <div class="stat-value" id="about-count">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Tracks</div>
-        <div class="stat-pills">
-          <span class="pill ok">stable <strong id="about-stable">0</strong></span>
-          <span class="pill beta">beta <strong id="about-beta">0</strong></span>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Highest code</div>
-        <div class="stat-value" id="about-maxcode">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Newest release</div>
-        <div class="stat-value" id="about-newest">—</div>
-        <div class="stat-note mono" id="about-newest-app">—</div>
-      </div>
-    </section>
+    <div class="about-body">
+      <section class="about-stats" aria-label="Service summary">
+        <article class="about-stat">
+          <b>Schema</b>
+          <div class="val" id="ab-schema">--</div>
+        </article>
+        <article class="about-stat">
+          <b>Generated</b>
+          <div class="val" id="ab-gen">--</div>
+          <div class="note" id="ab-gen-sub">UTC</div>
+        </article>
+        <article class="about-stat">
+          <b>Apps</b>
+          <div class="val" id="ab-apps">--</div>
+        </article>
+        <article class="about-stat tracks">
+          <b>Tracks</b>
+          <div class="badges" id="ab-tracks">
+            <span class="badge-chip ok">stable <strong id="ab-track-stable">0</strong></span>
+            <span class="badge-chip beta">beta <strong id="ab-track-beta">0</strong></span>
+          </div>
+        </article>
+        <article class="about-stat">
+          <b>Highest code</b>
+          <div class="val" id="ab-max-code">--</div>
+        </article>
+        <article class="about-stat">
+          <b>Newest release</b>
+          <div class="val" id="ab-newest-date">--</div>
+          <div class="note mono" id="ab-newest-app">--</div>
+        </article>
+      </section>
 
-    <section class="about-columns">
-      <div class="about-col">
-        <h3>What is this?</h3>
-        <p>This site exposes public endpoints (JSON / TXT / INI / CODE) that apps by
-          <a href="https://github.com/skillerious" target="_blank" rel="noopener">Robin Doak</a> read to decide if an update is available.</p>
+      <section class="about-desc" aria-label="What this service provides">
+        <h3 class="about-heading">What is this?</h3>
+        <p>This service ships machine-readable endpoints (JSON / TXT / INI / CODE) that Skillerious apps call to check for updates.</p>
         <ul class="about-bullets">
-          <li><strong>No push installs</strong> — the site never installs software.</li>
-          <li><strong>Public metadata</strong> — versions, release links, integer codes.</li>
-          <li><strong>Client-driven</strong> — update logic runs in each app.</li>
+          <li><strong>No push installs</strong> - the site never installs software for you.</li>
+          <li><strong>Public metadata</strong> - versions, release links, integer codes.</li>
+          <li><strong>Client-driven</strong> - each app decides what to do with the data.</li>
         </ul>
+      </section>
 
-        <div class="about-kv">
-          <div>Base URL</div> <div><code class="mono" id="about-baseurl">—</code></div>
-          <div>Selected app</div> <div><code class="mono" id="about-sample-app">—</code></div>
-          <div>JSON size</div> <div id="about-size">—</div>
+      <section class="about-meta" aria-label="Service metadata">
+        <h3 class="about-heading">Details</h3>
+        <div class="meta">
+          <div class="k">Base URL</div><div><code class="mono" id="ab-base-url">--</code></div>
+          <div class="k">Selected app</div><div><code class="mono" id="ab-sample-app">--</code></div>
+          <div class="k">JSON size</div><div id="ab-json-size">--</div>
+          <div class="k">Contact</div><div id="ab-contact">--</div>
         </div>
-      </div>
+      </section>
 
-      <div class="about-col">
-        <h3>Quick links</h3>
-        <div class="about-links">
-          <a class="a-chip" id="about-link-json" href="?format=json" target="_blank" rel="noopener">JSON</a>
-          <a class="a-chip" id="about-link-txt"  href="?format=txt"  target="_blank" rel="noopener">TXT</a>
-          <a class="a-chip" id="about-link-ini"  href="?format=ini"  target="_blank" rel="noopener">INI</a>
-          <a class="a-chip" id="about-link-code" href="?format=code" target="_blank" rel="noopener">CODE</a>
+      <section class="about-links" aria-label="Quick links">
+        <h3 class="about-heading">Quick links</h3>
+        <div class="quick">
+          <a class="json" id="ab-link-json" href="?format=json" target="_blank" rel="noopener">JSON</a>
+          <a class="txt" id="ab-link-txt" href="?format=txt" target="_blank" rel="noopener">TXT</a>
+          <a class="ini" id="ab-link-ini" href="?format=ini" target="_blank" rel="noopener">INI</a>
+          <a class="code" id="ab-link-code" href="?format=code" target="_blank" rel="noopener">CODE</a>
         </div>
-
-        <h3>Tip</h3>
-        <p class="about-tip">
-          You can request a single app:
-          <code class="mono">?format=json&amp;app=&lt;id&gt;</code> or just the integer code:
-          <code class="mono">?format=code&amp;app=&lt;id&gt;</code>
-        </p>
-      </div>
-    </section>
+        <p class="about-tip">Tip: add <code class="mono">?format=json&amp;app=&lt;id&gt;</code> or <code class="mono">?format=code&amp;app=&lt;id&gt;</code> to target a single app.</p>
+      </section>
+    </div>
   </div>
+
 </div>
-
-
 <!-- Toast container (CSP-safe) -->
 <div id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
@@ -437,3 +432,4 @@
 <script src="app.js" defer></script>
 </body>
 </html>
+

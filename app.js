@@ -586,6 +586,10 @@ download=${L.download ?? ''}\n`;
 
     function ensureAboutDOM() {
       const head = $('.about-head');
+      const body = $('.about-body');
+      if (head?.querySelector('.about-badge') && body?.querySelector('#ab-schema')) {
+        return;
+      }
       // add small icon + premium title block
       if (head && !head.querySelector('.about-icon')) {
         const icon = document.createElement('div');
@@ -603,7 +607,6 @@ download=${L.download ?? ''}\n`;
       }
 
       // body
-      const body = $('.about-body');
       if (body && !body.querySelector('#ab-schema')) {
         body.innerHTML = `
           <div class="about-stats">
@@ -644,7 +647,7 @@ download=${L.download ?? ''}\n`;
 
       const schemaEl = el('ab-schema', 'about-schema');
       const genEl = el('ab-gen', 'about-generated');
-      const genSub = document.getElementById('ab-gen-sub');
+      const genSub = document.getElementById('ab-gen-sub') || document.getElementById('about-generated-ago');
       const appsEl = el('ab-apps', 'about-count');
 
       if (schemaEl) schemaEl.textContent = String(d.schemaVersion || '2');
@@ -663,12 +666,129 @@ download=${L.download ?? ''}\n`;
           hour12: false
         });
         if (genEl) genEl.textContent = `${dStr}, ${tStr}`;
-        if (genSub) genSub.textContent = 'UTC';
+        if (genSub) {
+          const diffMs = Date.now() - dt.getTime();
+          let rel = '';
+          if (Number.isFinite(diffMs) && diffMs >= 0) {
+            const mins = Math.floor(diffMs / 60000);
+            if (mins < 60) rel = `${mins} min ago`;
+            else if (mins < 60 * 24) rel = `${Math.floor(mins / 60)} hr ago`;
+            else rel = `${Math.floor(mins / (60 * 24))} d ago`;
+          }
+          genSub.textContent = rel ? `UTC | ${rel}` : 'UTC';
+        }
       } catch {
-        if (genEl) genEl.textContent = d.generated || '—';
-        if (genSub) genSub.textContent = '—';
+        if (genEl) genEl.textContent = d.generated || '--';
+        if (genSub) genSub.textContent = 'UTC';
       }
       if (appsEl) appsEl.textContent = String(d.apps?.length || 0);
+
+      const stableEl = el('ab-track-stable', 'about-stable');
+      const betaEl = el('ab-track-beta', 'about-beta');
+      const maxCodeEl = el('ab-max-code', 'about-maxcode');
+      const newestDateEl = el('ab-newest-date', 'about-newest');
+      const newestAppEl = el('ab-newest-app', 'about-newest-app');
+      const baseUrlEl = el('ab-base-url', 'about-baseurl');
+      const sampleAppEl = el('ab-sample-app', 'about-sample-app');
+      const jsonSizeEl = el('ab-json-size', 'about-size');
+      const contactEl = document.getElementById('ab-contact');
+      const linkJson = document.getElementById('ab-link-json') || document.getElementById('about-link-json');
+      const linkTxt = document.getElementById('ab-link-txt') || document.getElementById('about-link-txt');
+      const linkIni = document.getElementById('ab-link-ini') || document.getElementById('about-link-ini');
+      const linkCode = document.getElementById('ab-link-code') || document.getElementById('about-link-code');
+
+      const apps = Array.isArray(d.apps) ? d.apps : [];
+      const trackCounts = Object.create(null);
+      let maxCode = 0;
+      let newest = null;
+      for (const app of apps) {
+        const tracks = app.tracks || {};
+        for (const [trackName, info] of Object.entries(tracks)) {
+          if (!info) continue;
+          const key = (trackName || '').toLowerCase();
+          trackCounts[key] = (trackCounts[key] || 0) + 1;
+          const codeNum = Number(info.code);
+          if (Number.isFinite(codeNum) && codeNum > maxCode) maxCode = codeNum;
+          if (info.date) {
+            const dt = new Date(info.date);
+            if (!Number.isNaN(dt.valueOf())) {
+              if (!newest || dt > newest.date) {
+                newest = { date: dt, info, app, track: key || trackName };
+              }
+            }
+          }
+        }
+      }
+
+      if (stableEl) stableEl.textContent = String(trackCounts.stable || 0);
+      if (betaEl) betaEl.textContent = String(trackCounts.beta || 0);
+      if (maxCodeEl) maxCodeEl.textContent = maxCode ? display.codeText(maxCode) : '--';
+      if (newestDateEl) {
+        newestDateEl.textContent = newest
+          ? newest.date.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+          : '--';
+      }
+      if (newestAppEl) {
+        if (newest) {
+          const ver = display.version(newest.info.version);
+          const parts = [newest.app.name || newest.app.id];
+          if (ver !== '-') parts.push(ver);
+          if (newest.track) parts.push(newest.track);
+          newestAppEl.textContent = parts.join(' | ');
+        } else {
+          newestAppEl.textContent = '--';
+        }
+      }
+
+      const pageUrl = new URL(location.href);
+      pageUrl.search = '';
+      pageUrl.hash = '';
+      const baseHref = `${pageUrl.origin}${pageUrl.pathname}`.replace(/index\.html$/i, 'index.html');
+      if (baseUrlEl) {
+        baseUrlEl.textContent = baseHref;
+        baseUrlEl.setAttribute('title', baseHref);
+      }
+      if (sampleAppEl) {
+        const selectedId = picker?.dataset.value || apps[0]?.id || 'n/a';
+        const selected = apps.find((a) => a.id === selectedId);
+        const label =
+          pickerValue?.textContent?.trim() ||
+          `${selected?.name || selectedId} (${selectedId})`;
+        sampleAppEl.textContent = label;
+      }
+      if (jsonSizeEl) {
+        let label = '--';
+        try {
+          const blob = new Blob([JSON.stringify(d)]);
+          let bytes = blob.size;
+          const units = ['B', 'KB', 'MB'];
+          let unit = 0;
+          while (bytes >= 1024 && unit < units.length - 1) {
+            bytes /= 1024;
+            unit += 1;
+          }
+          const value = unit === 0 ? Math.round(bytes) : bytes < 10 ? bytes.toFixed(1) : Math.round(bytes);
+          label = `${value} ${units[unit]}`;
+        } catch {
+          const str = JSON.stringify(d) || '';
+          label = `${str.length} chars`;
+        }
+        jsonSizeEl.textContent = label;
+      }
+      if (contactEl) {
+        const cleaned = (d.contact || 'Skillerious - Robin Doak').replace(/[\u2013\u2014]/g, '-');
+        contactEl.textContent = cleaned;
+      }
+      const linkPairs = [
+        [linkJson, '?format=json'],
+        [linkTxt, '?format=txt'],
+        [linkIni, '?format=ini'],
+        [linkCode, '?format=code']
+      ];
+      linkPairs.forEach(([anchor, path]) => {
+        if (!anchor) return;
+        anchor.setAttribute('href', path);
+      });
     }
 
     function openAbout() {
@@ -695,3 +815,6 @@ download=${L.download ?? ''}\n`;
     initInteractive(data);
   })();
 })();
+
+
+
