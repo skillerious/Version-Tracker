@@ -1,19 +1,11 @@
 (() => {
   'use strict';
 
-  // ------------------------------
-  // Small DOM helpers
-  // ------------------------------
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const qs = new URLSearchParams(location.search);
 
-  // Single place to keep the JSON once loaded so multiple features can use it
-  let VERSIONS_DATA = null;
-
-  // ------------------------------
-  // Load JSON from /repoversion.json
-  // ------------------------------
+  /* ----------------------- data ----------------------- */
   async function loadData() {
     try {
       const res = await fetch('repoversion.json', { cache: 'no-store' });
@@ -33,9 +25,7 @@
     }
   }
 
-  // ------------------------------
-  // Machine-readable endpoints (json/txt/ini/code)
-  // ------------------------------
+  /* ---------------- machine endpoints ---------------- */
   function handleMachineEndpoints(data) {
     const format = (qs.get('format') || '').toLowerCase();
     if (!format) return false;
@@ -52,15 +42,13 @@
         const lines = apps
           .map((a) => `${a.id}=${pickLatest(a)?.code ?? 0}`)
           .join('\n');
-        document.body.innerHTML =
-          '<pre class="json-out">' + lines + '</pre>';
+        document.body.innerHTML = '<pre class="json-out">' + lines + '</pre>';
         document.title = 'versions.txt';
         return true;
       } else {
         const app = apps.find((a) => a.id === appId);
         const code = String(app ? pickLatest(app)?.code ?? 0 : 0);
-        document.body.innerHTML =
-          '<pre class="json-out">' + code + '</pre>';
+        document.body.innerHTML = '<pre class="json-out">' + code + '</pre>';
         document.title = `${appId}.code`;
         return true;
       }
@@ -92,28 +80,22 @@ download=${L.download ?? ''}\n`;
       if (appId) {
         const app = apps.find((a) => a.id === appId);
         const out = app ? block(app) : `error=app_not_found\napp=${appId}\n`;
-        document.body.innerHTML =
-          '<pre class="json-out">' + out + '</pre>';
+        document.body.innerHTML = '<pre class="json-out">' + out + '</pre>';
         document.title = `${appId}.${format}`;
         return true;
       }
       if (latestOnly) {
         const out = apps
           .map(
-            (a) =>
-              `${a.id} ${pickLatest(a)?.code ?? 0} ${
-                pickLatest(a)?.version ?? ''
-              }`
+            (a) => `${a.id} ${pickLatest(a)?.code ?? 0} ${pickLatest(a)?.version ?? ''}`
           )
           .join('\n');
-        document.body.innerHTML =
-          '<pre class="json-out">' + out + '</pre>';
+        document.body.innerHTML = '<pre class="json-out">' + out + '</pre>';
         document.title = 'latest.txt';
         return true;
       }
       const out = apps.map(block).join('\n');
-      document.body.innerHTML =
-        '<pre class="json-out">' + out + '</pre>';
+      document.body.innerHTML = '<pre class="json-out">' + out + '</pre>';
       document.title = `versions.${format}`;
       return true;
     }
@@ -122,14 +104,13 @@ download=${L.download ?? ''}\n`;
       if (latestOnly) {
         const latest = {};
         for (const a of apps) {
-          const L =
-            (a.tracks && (a.tracks[trackKey] || a.tracks.stable)) || null;
+          const L = (a.tracks && (a.tracks[trackKey] || a.tracks.stable)) || null;
           if (L) latest[a.id] = { version: L.version, code: L.code };
         }
         const out = {
           schemaVersion: data.schemaVersion,
           generated: data.generated,
-          latest,
+          latest
         };
         document.body.innerHTML =
           '<pre class="json-out">' + JSON.stringify(out, null, 2) + '</pre>';
@@ -142,29 +123,24 @@ download=${L.download ?? ''}\n`;
           const out = {
             error: 'app_not_found',
             app: appId,
-            available: apps.map((a) => a.id),
+            available: apps.map((a) => a.id)
           };
           document.body.innerHTML =
-            '<pre class="json-out">' +
-            JSON.stringify(out, null, 2) +
-            '</pre>';
+            '<pre class="json-out">' + JSON.stringify(out, null, 2) + '</pre>';
           document.title = 'versions.json';
           return true;
         }
         const L =
-          (app.tracks && (app.tracks[trackKey] || app.tracks.stable)) ||
-          null;
+          (app.tracks && (app.tracks[trackKey] || app.tracks.stable)) || null;
         const trackName = L
-          ? (Object.entries(app.tracks).find(([, v]) => v === L) || [
-              trackKey,
-            ])[0]
+          ? (Object.entries(app.tracks).find(([, v]) => v === L) || [trackKey])[0]
           : trackKey;
         const out = {
           schemaVersion: data.schemaVersion,
           generated: data.generated,
           app: app.id,
           track: trackName,
-          latest: L,
+          latest: L
         };
         document.body.innerHTML =
           '<pre class="json-out">' + JSON.stringify(out, null, 2) + '</pre>';
@@ -180,39 +156,33 @@ download=${L.download ?? ''}\n`;
     return false;
   }
 
-  // ------------------------------
-  // Interactive UI
-  // ------------------------------
+  /* -------------------- interactive UI -------------------- */
   function initInteractive(data) {
-    VERSIONS_DATA = data;
+    const setText = (el, v) => { if (el) el.textContent = v; };
 
-    // Schema + counters in hero
-    $('#schema-ver').textContent = String(data.schemaVersion || '2');
-
-    const appCountEl = document.getElementById('app-count');
+    setText($('#schema-ver'), String(data.schemaVersion || '2'));
+    const appCountEl = $('#app-count');
     if (appCountEl) appCountEl.textContent = (data.apps || []).length;
 
-    // Updated timestamp (UTC)
     try {
       const dt = new Date(data.generated);
-      const fmtDate = dt.toLocaleString('en-GB', {
+      const d = dt.toLocaleString('en-GB', {
         timeZone: 'UTC',
         day: '2-digit',
         month: 'short',
-        year: 'numeric',
+        year: 'numeric'
       });
-      const fmtTime = dt.toLocaleString('en-GB', {
+      const t = dt.toLocaleString('en-GB', {
         timeZone: 'UTC',
         hour: '2-digit',
         minute: '2-digit',
-        hour12: false,
+        hour12: false
       });
-      $('#updated-badge').textContent = `Updated ${fmtDate} • ${fmtTime} UTC`;
+      setText($('#updated-badge'), `Updated ${d} • ${t} UTC`);
     } catch {
-      $('#updated-badge').textContent = data.generated || '—';
+      setText($('#updated-badge'), data.generated || '—');
     }
 
-    // Elements
     const qInput = $('#q'),
       trackSel = $('#track'),
       sortSel = $('#sort'),
@@ -222,10 +192,10 @@ download=${L.download ?? ''}\n`;
     const display = {
       version: (v) => (v && String(v).trim() ? v : '—'),
       codeText: (c) => (c && Number(c) !== 0 ? String(c) : '—'),
-      codeValue: (c) => c ?? 0,
+      codeValue: (c) => c ?? 0
     };
 
-    function toRows() {
+    const toRows = () => {
       const rows = [];
       for (const app of data.apps || []) {
         for (const [track, latest] of Object.entries(app.tracks || {})) {
@@ -233,11 +203,11 @@ download=${L.download ?? ''}\n`;
         }
       }
       return rows;
-    }
+    };
 
     function applyFilters(rows) {
-      const q = (qInput.value || '').toLowerCase().trim();
-      const t = (trackSel.value || 'all').toLowerCase();
+      const q = (qInput?.value || '').toLowerCase().trim();
+      const t = (trackSel?.value || 'all').toLowerCase();
       let out = rows.filter((r) => {
         const hit =
           !q ||
@@ -248,11 +218,9 @@ download=${L.download ?? ''}\n`;
         const tk = t === 'all' || r.track === t;
         return hit && tk;
       });
-      switch (sortSel.value) {
+      switch (sortSel?.value) {
         case 'code_asc':
-          out.sort(
-            (a, b) => (a.latest.code ?? 0) - (b.latest.code ?? 0)
-          );
+          out.sort((a, b) => (a.latest.code ?? 0) - (b.latest.code ?? 0));
           break;
         case 'name_asc':
           out.sort((a, b) =>
@@ -265,14 +233,13 @@ download=${L.download ?? ''}\n`;
           );
           break;
         default:
-          out.sort(
-            (a, b) => (b.latest.code ?? 0) - (a.latest.code ?? 0)
-          );
+          out.sort((a, b) => (b.latest.code ?? 0) - (a.latest.code ?? 0));
       }
       return out;
     }
 
     function renderTable(rows) {
+      if (!tbody) return;
       tbody.innerHTML = '';
       for (const r of rows) {
         const tr = document.createElement('tr');
@@ -285,14 +252,11 @@ download=${L.download ?? ''}\n`;
           links.push(
             `<a href="${r.latest.download}" target="_blank" rel="noopener">download</a>`
           );
-        if (r.latest.notes)
-          links.push(`<span title="${r.latest.notes}">notes</span>`);
+        if (r.latest.notes) links.push(`<span title="${r.latest.notes}">notes</span>`);
         tr.innerHTML = `
           <td><strong>${r.app.name || r.app.id}</strong></td>
           <td class="id">${r.app.id}</td>
-          <td><span class="pill ${r.track === 'beta' ? 'beta' : 'ok'}">${
-          r.track
-        }</span></td>
+          <td><span class="pill ${r.track === 'beta' ? 'beta' : 'ok'}">${r.track}</span></td>
           <td class="mono">${display.version(r.latest.version)}</td>
           <td class="mono">${display.codeText(r.latest.code)}</td>
           <td>${r.latest.date ?? '—'}</td>
@@ -303,11 +267,11 @@ download=${L.download ?? ''}\n`;
 
     function chevronSVG() {
       return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>`;
+        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     }
 
     function renderMobile(rows) {
+      if (!list) return;
       list.innerHTML = '';
       for (const r of rows) {
         const li = document.createElement('li');
@@ -323,8 +287,7 @@ download=${L.download ?? ''}\n`;
           links.push(
             `<a href="${r.latest.download}" target="_blank" rel="noopener">download</a>`
           );
-        if (r.latest.notes)
-          links.push(`<span title="${r.latest.notes}">notes</span>`);
+        if (r.latest.notes) links.push(`<span title="${r.latest.notes}">notes</span>`);
 
         const ver = display.version(r.latest.version);
         const codeDisplay = display.codeText(r.latest.code);
@@ -340,23 +303,15 @@ download=${L.download ?? ''}\n`;
           <div class="m-details">
             <div class="m-divider"></div>
             <div class="m-grid">
-              <div class="m-label">Track</div><div><span class="pill ${
-                r.track === 'beta' ? 'beta' : 'ok'
-              }">${r.track}</span></div>
+              <div class="m-label">Track</div><div><span class="pill ${r.track === 'beta' ? 'beta' : 'ok'}">${r.track}</span></div>
               <div class="m-label">App ID</div><div class="mono">${r.app.id}</div>
               <div class="m-label">Date</div><div>${r.latest.date ?? '—'}</div>
-              <div class="m-label">Links</div><div class="links">${
-                links.join(' · ') || '—'
-              }</div>
+              <div class="m-label">Links</div><div class="links">${links.join(' · ') || '—'}</div>
             </div>
             <div class="m-actions">
               <button class="btn-mini" data-copy="code" data-val="${codeCopy}">Copy code</button>
-              <button class="btn-mini" data-copy="endpoint" data-val="?format=code&app=${
-                r.app.id
-              }">Copy endpoint</button>
-              <a class="btn-mini" href="?format=json&app=${
-                r.app.id
-              }" target="_blank" rel="noopener">Open JSON</a>
+              <button class="btn-mini" data-copy="endpoint" data-val="?format=code&app=${r.app.id}">Copy endpoint</button>
+              <a class="btn-mini" href="?format=json&app=${r.app.id}" target="_blank" rel="noopener">Open JSON</a>
             </div>
           </div>
         `;
@@ -378,16 +333,16 @@ download=${L.download ?? ''}\n`;
       }
     }
 
-    // ---------- Custom app picker ----------
+    /* ---------- custom picker ---------- */
     const picker = $('#app-picker'),
       pickerBtn = $('#picker-btn'),
-      pickerPanel = $('#picker-panel');
-
-    const pickerList = $('#picker-list'),
+      pickerPanel = $('#picker-panel'),
+      pickerList = $('#picker-list'),
       pickerSearch = $('#picker-search'),
       pickerValue = $('#picker-value');
 
     function buildPicker(appIds) {
+      if (!picker) return;
       pickerList.innerHTML = '';
       appIds.forEach(({ id, name }) => {
         const li = document.createElement('li');
@@ -411,50 +366,56 @@ download=${L.download ?? ''}\n`;
       if (first) setPicker(first.id, first.name || first.id);
     }
     function setPicker(id, label) {
+      if (!picker) return;
       picker.dataset.value = id;
-      pickerValue.textContent = `${label} (${id})`;
+      if (pickerValue) pickerValue.textContent = `${label} (${id})`;
     }
     function openPicker() {
+      if (!picker) return;
       picker.setAttribute('aria-expanded', 'true');
-      pickerBtn.setAttribute('aria-expanded', 'true');
+      pickerBtn?.setAttribute('aria-expanded', 'true');
       pickerPanel.style.display = 'grid';
-      pickerSearch.value = '';
-      pickerSearch.focus();
-      filterPicker();
+      if (pickerSearch) {
+        pickerSearch.value = '';
+        pickerSearch.focus();
+        filterPicker();
+      }
     }
     function closePicker() {
+      if (!picker) return;
       picker.setAttribute('aria-expanded', 'false');
-      pickerBtn.setAttribute('aria-expanded', 'false');
+      pickerBtn?.setAttribute('aria-expanded', 'false');
       pickerPanel.style.display = 'none';
     }
     function filterPicker() {
-      const q = (pickerSearch.value || '').toLowerCase().trim();
+      const q = (pickerSearch?.value || '').toLowerCase().trim();
       $$('.picker-item', pickerList).forEach((li) => {
         const text = li.textContent.toLowerCase();
         li.style.display = text.includes(q) ? '' : 'none';
       });
     }
-    pickerBtn.addEventListener('click', (e) => {
+    pickerBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
       const open = picker.getAttribute('aria-expanded') === 'true';
       open ? closePicker() : openPicker();
     });
-    pickerSearch.addEventListener('input', filterPicker);
+    pickerSearch?.addEventListener('input', filterPicker);
     document.addEventListener('click', (e) => {
-      if (!picker.contains(e.target)) closePicker();
+      if (picker && !picker.contains(e.target)) closePicker();
     });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closePicker();
     });
 
-    // ---------- Endpoint boxes (absolute URLs) ----------
+    /* ---------- endpoint boxes ---------- */
     function setEndpointBox(boxSel, path) {
       const box = $(boxSel);
+      if (!box) return;
       const pathSpan = box.querySelector('.path');
       const epScroll = box.querySelector('.ep-scroll');
       const u = new URL(location.href);
       u.search = path.replace('./index.html', '').replace('./', '');
-      pathSpan.textContent = path;
+      if (pathSpan) pathSpan.textContent = path;
 
       const openId = boxSel.replace('#', '') + '-open';
       const a = document.getElementById(openId);
@@ -463,24 +424,30 @@ download=${L.download ?? ''}\n`;
       if (epScroll) epScroll.scrollLeft = 0;
     }
     function updateEndpointBoxes() {
-      const id =
-        picker.dataset.value || data.apps?.[0]?.id || 'your-app-id';
+      const id = picker?.dataset.value || data.apps?.[0]?.id || 'your-app-id';
       setEndpointBox('#ep-all', `./index.html?format=json`);
       setEndpointBox('#ep-compact', `./index.html?format=json&latest=1`);
       setEndpointBox('#ep-one', `./index.html?format=json&app=${id}`);
       setEndpointBox('#ep-code', `./index.html?format=code&app=${id}`);
     }
 
-    // ---------- Copy handlers (endpoints + mobile mini buttons) ----------
+    // Copy handlers
     document.addEventListener('click', async (e) => {
       const copyBtn = e.target.closest('[data-ep-copy]');
       if (copyBtn) {
         const sel = copyBtn.getAttribute('data-ep-copy');
         const box = $(sel);
-        const path = box.querySelector('.path').textContent.trim();
+        const path = box?.querySelector('.path')?.textContent?.trim() || '';
         const url = new URL(location.href);
         url.search = path.replace('./index.html', '').replace('./', '');
-        await copyText(url.toString(), copyBtn);
+        try {
+          await navigator.clipboard.writeText(url.toString());
+          const orig = copyBtn.innerHTML;
+          copyBtn.textContent = '✓';
+          setTimeout(() => (copyBtn.innerHTML = orig), 900);
+        } catch {
+          alert(url.toString());
+        }
         return;
       }
 
@@ -493,53 +460,50 @@ download=${L.download ?? ''}\n`;
           url.search = val;
           text = url.toString();
         }
-        await copyText(String(text), mini);
+        try {
+          await navigator.clipboard.writeText(String(text));
+          const t = mini.textContent;
+          mini.textContent = 'Copied!';
+          setTimeout(() => (mini.textContent = t), 900);
+        } catch {
+          alert(String(text));
+        }
       }
     });
 
-    // ---------- Toolbar actions (robust + fallback) ----------
-    const copyBtn = $('#btn-copy-json');
-    if (copyBtn) {
-      copyBtn.addEventListener('click', async () => {
-        const url = new URL(location.href);
-        url.search = '?format=json';
-        await copyText(url.toString(), copyBtn);
+    // Toolbar actions
+    $('#btn-copy-json')?.addEventListener('click', async () => {
+      const url = new URL(location.href);
+      url.search = '?format=json';
+      try {
+        await navigator.clipboard.writeText(url.toString());
+        const b = $('#btn-copy-json');
+        const t = b.textContent;
+        b.textContent = 'Copied!';
+        setTimeout(() => (b.textContent = t), 900);
+      } catch {
+        alert('Copy failed. ' + url.toString());
+      }
+    });
+    $('#btn-download-json')?.addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: 'application/json'
       });
-    }
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'versions.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
 
-    const downloadBtn = $('#btn-download-json');
-    if (downloadBtn) {
-      downloadBtn.addEventListener('click', () => {
-        try {
-          const blob = new Blob(
-            [JSON.stringify(VERSIONS_DATA || {}, null, 2)],
-            { type: 'application/json' }
-          );
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = 'versions.json';
-          // Ensure it's clickable in WebView
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(() => {
-            URL.revokeObjectURL(a.href);
-            a.remove();
-          }, 0);
-        } catch (err) {
-          alert('Download failed: ' + String(err));
-        }
-      });
-    }
-
-    // Build UI initially + wire filters
     function build() {
       const rows = applyFilters(toRows());
       renderTable(rows);
       renderMobile(rows);
 
-      // Build app list for picker from visible rows; fall back to all
-      const uniq = [];
+      // picker list
       const seen = new Set();
+      const uniq = [];
       for (const r of rows) {
         if (!seen.has(r.app.id)) {
           seen.add(r.app.id);
@@ -547,49 +511,51 @@ download=${L.download ?? ''}\n`;
         }
       }
       if (uniq.length === 0) {
-        const all = (data.apps || []).map((a) => ({
-          id: a.id,
-          name: a.name,
-        }));
+        const all = (data.apps || []).map((a) => ({ id: a.id, name: a.name }));
         buildPicker(all);
       } else {
         buildPicker(uniq);
       }
 
       updateEndpointBoxes();
-      if (picker.getAttribute('aria-expanded') === 'true') pickerBtn.click();
+      if (picker?.getAttribute('aria-expanded') === 'true') pickerBtn.click();
     }
 
-    qInput.addEventListener('input', build);
-    trackSel.addEventListener('change', build);
-    sortSel.addEventListener('change', build);
-
+    qInput?.addEventListener('input', build);
+    trackSel?.addEventListener('change', build);
+    sortSel?.addEventListener('change', build);
     build();
 
-    // ------------------------------
-    // Bottom navigation actions
-    // ------------------------------
-    const navExpand = document.getElementById('nav-expand');
-    const navExpandList = document.getElementById('nav-expand-list');
-    const navExpandIcon = document.getElementById('nav-expand-icon');
+    /* ----------------- bottom bar ----------------- */
+    const nav = $('#mobile-nav');
+    const navExpand = $('#nav-expand');
+    const navExpandList = $('#nav-expand-list');
+    const navExpandIcon = $('#nav-expand-icon');
 
-    if (navExpand && navExpandList && navExpandIcon) {
-      navExpand.addEventListener('click', () => {
-        navExpandList.classList.toggle('show-list');
-        navExpandIcon.classList.toggle('rotate-icon');
-      });
-    }
+    navExpand?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navExpandList?.classList.toggle('show-list');
+      navExpandIcon?.classList.toggle('rotate-icon');
+    });
+    document.addEventListener('click', (ev) => {
+      if (!nav?.contains(ev.target)) {
+        navExpandList?.classList.remove('show-list');
+        navExpandIcon?.classList.remove('rotate-icon');
+      }
+    });
 
-    // Delegated clicks for nav + quick actions
-    document.addEventListener('click', (e) => {
-      const actEl = e.target.closest('[data-act]');
-      if (!actEl) return;
-
-      const act = actEl.getAttribute('data-act');
+    nav?.addEventListener('click', (e) => {
+      const link = e.target.closest('.nav__link, .nav__expand-link');
+      if (!link) return;
+      const act = link.getAttribute('data-act');
+      if (!act) return;
+      e.preventDefault();
 
       switch (act) {
         case 'back':
-          if (history.length > 1) history.back();
+          history.length > 1
+            ? history.back()
+            : window.scrollTo({ top: 0, behavior: 'smooth' });
           break;
         case 'forward':
           history.forward();
@@ -597,128 +563,135 @@ download=${L.download ?? ''}\n`;
         case 'about':
           openAbout();
           break;
-        case 'home': {
-          const url = new URL(location.href);
-          url.search = '';
-          url.hash = '';
-          location.href = url.toString();
+        case 'home':
+          location.href = 'index.html';
           break;
-        }
         case 'refresh':
           location.reload();
           break;
         case 'top':
           window.scrollTo({ top: 0, behavior: 'smooth' });
           break;
-        default:
-          break;
+      }
+
+      if (act !== 'about') {
+        navExpandList?.classList.remove('show-list');
+        navExpandIcon?.classList.remove('rotate-icon');
       }
     });
 
-    // ------------------------------
-    // About dialog
-    // ------------------------------
-    const aboutModal = $('#about');
-    const aboutCard = $('#about-card');
+    /* ----------------- about dialog ----------------- */
+    const about = $('#about');
     const aboutClose = $('#about-close');
 
-    function fillAbout() {
-      $('#about-schema').textContent = String(
-        VERSIONS_DATA?.schemaVersion ?? '—'
-      );
+    function ensureAboutDOM() {
+      const head = $('.about-head');
+      // add small icon + premium title block
+      if (head && !head.querySelector('.about-icon')) {
+        const icon = document.createElement('div');
+        icon.className = 'about-icon';
+        icon.innerHTML =
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8h.01M11 12h2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+        head.prepend(icon);
+      }
+      if (head && !head.querySelector('.about-title')) {
+        const t = document.createElement('div');
+        t.className = 'about-title';
+        t.innerHTML =
+          '<span class="t1">Skillerious Version Tracker</span><span class="t2">by Robin Doak • machine-readable endpoints for apps</span>';
+        head.insertBefore(t, $('#about-close'));
+      }
+
+      // body
+      const body = $('.about-body');
+      if (body && !body.querySelector('#ab-schema')) {
+        body.innerHTML = `
+          <div class="about-stats">
+            <div class="stat"><div class="k">Schema</div><div class="v" id="ab-schema">—</div></div>
+            <div class="stat"><div class="k">Generated (UTC)</div><div class="v" id="ab-gen">—</div><div class="subl" id="ab-gen-sub">—</div></div>
+            <div class="stat"><div class="k">Apps</div><div class="v" id="ab-apps">—</div></div>
+            <div class="stat"><div class="k">Tracks</div><div class="track-row"><span class="badge-small ok">stable</span><span class="badge-small beta">beta</span></div></div>
+          </div>
+          <div class="meta-grid" style="margin-top:12px">
+            <div class="meta">
+              <h4>What is this?</h4>
+              <p>This service exposes public endpoints (JSON / TXT / INI / CODE) that your apps can read to decide if an update is available.</p>
+              <ul class="foot-list" style="margin-top:8px">
+                <li><strong>No push installs</strong> — the site never installs software.</li>
+                <li><strong>Public metadata</strong> — versions, release links, and integer codes.</li>
+                <li><strong>Client-driven</strong> — update logic runs in each app.</li>
+              </ul>
+            </div>
+            <div class="meta">
+              <h4>Quick links</h4>
+              <div class="quick-links">
+                <a class="json" href="?format=json">JSON</a>
+                <a class="txt"  href="?format=txt">TXT</a>
+                <a class="ini"  href="?format=ini">INI</a>
+                <a class="code" href="?format=code">CODE</a>
+              </div>
+              <p style="margin-top:10px;color:var(--muted)">Made by <a class="foot-link" href="https://github.com/skillerious" target="_blank" rel="noopener">Robin Doak</a></p>
+            </div>
+          </div>`;
+      }
+    }
+
+    function fillAbout(d) {
+      ensureAboutDOM();
+
+      // Support both new (#ab-*) and legacy (#about-*) IDs
+      const el = (idNew, idOld) => document.getElementById(idNew) || document.getElementById(idOld);
+
+      const schemaEl = el('ab-schema', 'about-schema');
+      const genEl = el('ab-gen', 'about-generated');
+      const genSub = document.getElementById('ab-gen-sub');
+      const appsEl = el('ab-apps', 'about-count');
+
+      if (schemaEl) schemaEl.textContent = String(d.schemaVersion || '2');
       try {
-        const dt = new Date(VERSIONS_DATA?.generated);
-        const fmt = dt.toLocaleString('en-GB', {
+        const dt = new Date(d.generated);
+        const dStr = dt.toLocaleString('en-GB', {
+          timeZone: 'UTC',
           day: '2-digit',
           month: 'short',
-          year: 'numeric',
+          year: 'numeric'
+        });
+        const tStr = dt.toLocaleString('en-GB', {
+          timeZone: 'UTC',
           hour: '2-digit',
           minute: '2-digit',
-          hour12: false,
-          timeZone: 'UTC',
+          hour12: false
         });
-        $('#about-generated').textContent = fmt + ' UTC';
+        if (genEl) genEl.textContent = `${dStr}, ${tStr}`;
+        if (genSub) genSub.textContent = 'UTC';
       } catch {
-        $('#about-generated').textContent =
-          VERSIONS_DATA?.generated ?? '—';
+        if (genEl) genEl.textContent = d.generated || '—';
+        if (genSub) genSub.textContent = '—';
       }
-      $('#about-count').textContent = String(
-        VERSIONS_DATA?.apps?.length ?? 0
-      );
+      if (appsEl) appsEl.textContent = String(d.apps?.length || 0);
     }
 
     function openAbout() {
-      if (!aboutModal) return;
-      fillAbout();
-      aboutModal.setAttribute('aria-hidden', 'false');
-      // focus the close button for accessibility
-      aboutClose?.focus();
-      document.addEventListener('keydown', onAboutKeydown);
+      fillAbout(data);
+      $('#about')?.setAttribute('aria-hidden', 'false');
     }
     function closeAbout() {
-      if (!aboutModal) return;
-      aboutModal.setAttribute('aria-hidden', 'true');
-      document.removeEventListener('keydown', onAboutKeydown);
-      // return focus to the + button if available
-      navExpand?.focus();
-    }
-    function onAboutKeydown(e) {
-      if (e.key === 'Escape') closeAbout();
+      $('#about')?.setAttribute('aria-hidden', 'true');
     }
 
-    aboutClose?.addEventListener('click', closeAbout);
-    aboutModal?.addEventListener('click', (e) => {
-      if (e.target === aboutModal) closeAbout(); // backdrop click
+    $('#about-close')?.addEventListener('click', closeAbout);
+    $('#about')?.addEventListener('click', (e) => {
+      if (e.target === $('#about')) closeAbout();
     });
-    // Prevent clicks inside the card from closing
-    aboutCard?.addEventListener('click', (e) => e.stopPropagation());
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAbout();
+    });
   }
 
-  // ------------------------------
-  // Utilities
-  // ------------------------------
-  async function copyText(text, buttonEl) {
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        // Fallback for WebView / non-secure contexts
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.setAttribute('readonly', '');
-        ta.style.position = 'absolute';
-        ta.style.left = '-9999px';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        ta.remove();
-      }
-      if (buttonEl) {
-        const orig = buttonEl.textContent || buttonEl.innerHTML;
-        buttonEl.textContent = 'Copied!';
-        setTimeout(() => {
-          // Restore safely
-          if (buttonEl) {
-            if (orig.includes('<')) buttonEl.innerHTML = orig;
-            else buttonEl.textContent = orig;
-          }
-        }, 900);
-      }
-    } catch {
-      alert(String(text));
-    }
-  }
-
-  // ------------------------------
-  // Boot
-  // ------------------------------
+  /* ----------------------- boot ----------------------- */
   (async function boot() {
     const data = await loadData();
-
-    // If ?format=... show machine output and stop everything else
     if (handleMachineEndpoints(data)) return;
-
-    // Otherwise render full interactive UI
     initInteractive(data);
   })();
 })();

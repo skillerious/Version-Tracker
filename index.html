@@ -343,20 +343,92 @@
 <div class="about-modal" id="about" aria-hidden="true" role="dialog" aria-modal="true">
   <div class="about-card" id="about-card" role="document">
     <header class="about-head">
-      <h2>About • Skillerious Version Tracker</h2>
-      <button class="about-close" id="about-close" aria-label="Close" type="button">✕</button>
-    </header>
-    <div class="about-body">
-      <div class="about-grid">
-        <div><strong>Schema</strong><div id="about-schema">—</div></div>
-        <div><strong>Generated</strong><div id="about-generated">—</div></div>
-        <div><strong>Apps</strong><div id="about-count">—</div></div>
+      <div class="about-title">
+        <span class="about-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 8h.01M11 12h2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <div class="about-title-text">
+          <h2>Skillerious Version Tracker</h2>
+          <p class="about-sub">Machine-readable version service for Skillerious apps</p>
+        </div>
       </div>
-      <p>This site provides machine-readable version endpoints (JSON / TXT / INI / CODE) for apps by
-        <a href="https://github.com/skillerious" target="_blank" rel="noopener">Robin Doak</a>. Update logic runs in each client app.</p>
-    </div>
+      <button class="about-close" id="about-close" aria-label="Close">✕</button>
+    </header>
+
+    <!-- Stat tiles -->
+    <section class="about-stats" aria-label="Service stats">
+      <div class="stat-card">
+        <div class="stat-label">Schema</div>
+        <div class="stat-value" id="about-schema">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Generated (UTC)</div>
+        <div class="stat-value" id="about-generated">—</div>
+        <div class="stat-note" id="about-generated-ago">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Apps</div>
+        <div class="stat-value" id="about-count">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Tracks</div>
+        <div class="stat-pills">
+          <span class="pill ok">stable <strong id="about-stable">0</strong></span>
+          <span class="pill beta">beta <strong id="about-beta">0</strong></span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Highest code</div>
+        <div class="stat-value" id="about-maxcode">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Newest release</div>
+        <div class="stat-value" id="about-newest">—</div>
+        <div class="stat-note mono" id="about-newest-app">—</div>
+      </div>
+    </section>
+
+    <section class="about-columns">
+      <div class="about-col">
+        <h3>What is this?</h3>
+        <p>This site exposes public endpoints (JSON / TXT / INI / CODE) that apps by
+          <a href="https://github.com/skillerious" target="_blank" rel="noopener">Robin Doak</a> read to decide if an update is available.</p>
+        <ul class="about-bullets">
+          <li><strong>No push installs</strong> — the site never installs software.</li>
+          <li><strong>Public metadata</strong> — versions, release links, integer codes.</li>
+          <li><strong>Client-driven</strong> — update logic runs in each app.</li>
+        </ul>
+
+        <div class="about-kv">
+          <div>Base URL</div> <div><code class="mono" id="about-baseurl">—</code></div>
+          <div>Selected app</div> <div><code class="mono" id="about-sample-app">—</code></div>
+          <div>JSON size</div> <div id="about-size">—</div>
+        </div>
+      </div>
+
+      <div class="about-col">
+        <h3>Quick links</h3>
+        <div class="about-links">
+          <a class="a-chip" id="about-link-json" href="?format=json" target="_blank" rel="noopener">JSON</a>
+          <a class="a-chip" id="about-link-txt"  href="?format=txt"  target="_blank" rel="noopener">TXT</a>
+          <a class="a-chip" id="about-link-ini"  href="?format=ini"  target="_blank" rel="noopener">INI</a>
+          <a class="a-chip" id="about-link-code" href="?format=code" target="_blank" rel="noopener">CODE</a>
+        </div>
+
+        <h3>Tip</h3>
+        <p class="about-tip">
+          You can request a single app:
+          <code class="mono">?format=json&amp;app=&lt;id&gt;</code> or just the integer code:
+          <code class="mono">?format=code&amp;app=&lt;id&gt;</code>
+        </p>
+      </div>
+    </section>
   </div>
 </div>
+
 
 <!-- Toast container (CSP-safe) -->
 <div id="toast-root" aria-live="polite" aria-atomic="true"></div>
