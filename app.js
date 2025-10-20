@@ -40,16 +40,20 @@
     if (format === 'code') {
       if (!appId) {
         const lines = apps
-          .map((a) => `${a.id}=${pickLatest(a)?.code ?? 0}`)
+          .map((a) => `${a.id}=${pickLatest(a)?.version ?? ''}`)
           .join('\n');
         document.body.innerHTML = '<pre class="json-out">' + lines + '</pre>';
         document.title = 'versions.txt';
         return true;
       } else {
         const app = apps.find((a) => a.id === appId);
-        const code = String(app ? pickLatest(app)?.code ?? 0 : 0);
-        document.body.innerHTML = '<pre class="json-out">' + code + '</pre>';
-        document.title = `${appId}.code`;
+        const latest = app ? pickLatest(app) : null;
+        const version =
+          latest && typeof latest.version !== 'undefined' && latest.version !== null
+            ? String(latest.version)
+            : '';
+        document.body.innerHTML = '<pre class="json-out">' + version + '</pre>';
+        document.title = `${appId}.version`;
         return true;
       }
     }
