@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-10-20T18:39:02Z",
+  "generated": "2025-10-20T18:39:27Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -8,8 +8,8 @@
       "name": "TornTargetTracker",
       "tracks": {
         "stable": {
-          "version": "2.6.2",
-          "code": 20602,
+          "version": "2.6.3",
+          "code": 20603,
           "date": "2025-10-18",
           "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.1",
           "download": "https://github.com/skillerious/TornTargetTracker/releases/download/V2.6.1/Target.Tracker.Installer.exe",
