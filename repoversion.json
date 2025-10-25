@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-10-25T11:03:09Z",
+  "generated": "2025-10-25T11:20:47Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -8,7 +8,7 @@
       "name": "TornTargetTracker",
       "tracks": {
         "stable": {
-          "version": "2.6.3",
+          "version": "2.6.2",
           "code": 20602,
           "date": "2025-10-18",
           "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.1",
@@ -17,6 +17,18 @@
         }
       },
       "history": [
+        {
+          "version": "2.6.3",
+          "code": 20602,
+          "date": "2025-10-18",
+          "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.1"
+        },
+        {
+          "version": "2.6.2",
+          "code": 20602,
+          "date": "2025-10-18",
+          "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.1"
+        },
         {
           "version": "2.6.0",
           "code": 20600,
