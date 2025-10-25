@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-10-25T23:36:27Z",
+  "generated": "2025-10-25T23:37:44Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -88,15 +88,22 @@
       "name": "Starfield-IDDB",
       "tracks": {
         "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
+          "version": "2.1.3",
+          "code": 20103,
+          "date": "2025-10-26",
           "url": "https://github.com/skillerious/Starfield-IDDB/releases",
           "download": "https://github.com/skillerious/Starfield-IDDB/releases/latest",
-          "notes": "Console command database + JSON editor."
+          "notes": ""
         }
       },
-      "history": []
+      "history": [
+        {
+          "version": "2.1.3",
+          "code": 20103,
+          "date": "2025-10-26",
+          "url": "https://github.com/skillerious/Starfield-IDDB/releases"
+        }
+      ]
     },
     {
       "id": "cleanname",
