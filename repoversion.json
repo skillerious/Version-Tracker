@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-10-25T11:22:04Z",
+  "generated": "2025-10-25T23:36:21Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -163,15 +163,22 @@
       "name": "Markiva",
       "tracks": {
         "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
-          "url": "https://github.com/skillerious/Markiva/releases",
-          "download": "https://github.com/skillerious/Markiva/releases/latest",
-          "notes": "Dark-themed, offline-first Markdown editor."
+          "version": "1.2.4",
+          "code": 10204,
+          "date": "2025-10-26",
+          "url": "",
+          "download": "",
+          "notes": ""
         }
       },
-      "history": []
+      "history": [
+        {
+          "version": "1.2.4",
+          "code": 10204,
+          "date": "2025-10-26",
+          "url": ""
+        }
+      ]
     },
     {
       "id": "falloutsheltersge",
