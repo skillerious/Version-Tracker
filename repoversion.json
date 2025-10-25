@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-10-25T09:24:40Z",
+  "generated": "2025-10-25T11:03:09Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -53,7 +53,14 @@
           "notes": "Professional USB drive formatter."
         }
       },
-      "history": []
+      "history": [
+        {
+          "version": "2.4.8",
+          "code": 2048,
+          "date": "2025-10-18",
+          "url": "https://github.com/skillerious/SwiftFormatter/releases"
+        }
+      ]
     },
     {
       "id": "loopback-recorder",
