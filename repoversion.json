@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-10-25T23:59:25Z",
+  "generated": "2025-10-26T10:19:39Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -81,7 +81,14 @@
           "notes": "Record Windows system audio."
         }
       },
-      "history": []
+      "history": [
+        {
+          "version": "1.0.0",
+          "code": 10000,
+          "date": "2025-10-18",
+          "url": "https://github.com/skillerious/Loopback-Recorder/releases"
+        }
+      ]
     },
     {
       "id": "starfield-iddb",
