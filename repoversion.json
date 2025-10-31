@@ -1,22 +1,28 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-10-31T23:45:17Z",
+  "generated": "2025-10-31T23:49:26Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
-      "id": "version-tracker-editor",
-      "name": "Version-Tracker-Editor",
+      "id": "torntargettracker",
+      "name": "TornTargetTracker",
       "tracks": {
         "stable": {
-          "version": "1.0.0",
-          "code": 1000,
-          "date": "2025-11-13",
-          "url": "",
-          "download": "",
-          "notes": ""
+          "version": "2.6.3",
+          "code": 206030,
+          "date": "2025-11-01",
+          "url": "https://github.com/skillerious/TornTargetTracker",
+          "download": "https://github.com/skillerious/TornTargetTracker/releases/download/V2.6.1/Target.Tracker.Installer.exe",
+          "notes": "Target Tracker is a fan‑made desktop tool for Torn.com players, built for tracking targets for chains, daily hunting, and monitoring activity."
         }
       },
       "history": [
+        {
+          "version": "2.6.3",
+          "code": 206030,
+          "date": "2025-11-01",
+          "url": "https://github.com/skillerious/TornTargetTracker"
+        },
         {
           "version": "1.0.0",
           "code": 1000,
