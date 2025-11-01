@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-11-01T00:41:42Z",
+  "generated": "2025-11-01T01:17:19Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -8,7 +8,7 @@
       "name": "VersionTrackerEditor",
       "tracks": {
         "stable": {
-          "version": "1.0.1",
+          "version": "1.0.2",
           "code": 100010,
           "date": "2025-11-14",
           "url": "",
@@ -17,6 +17,12 @@
         }
       },
       "history": [
+        {
+          "version": "1.0.2",
+          "code": 100010,
+          "date": "2025-11-14",
+          "url": ""
+        },
         {
           "version": "1.0.1",
           "code": 100010,
