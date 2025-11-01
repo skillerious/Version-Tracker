@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-11-01T01:17:19Z",
+  "generated": "2025-11-01T15:59:19Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -11,9 +11,9 @@
           "version": "1.0.2",
           "code": 100010,
           "date": "2025-11-14",
-          "url": "",
-          "download": "",
-          "notes": ""
+          "url": "https://github.com/skillerious/Version-Tracker-Editor",
+          "download": "https://github.com/skillerious/Version-Tracker-Editor/releases",
+          "notes": "Version Tracker is your all-in-one release command centre. Pull the latest manifest from GitHub, curate repoversion.json with precision, capture every change with real-time validation and preview, generate shareable insights for your team, and publish confidently—without ever leaving your desktop workflow."
         }
       },
       "history": [
@@ -21,7 +21,7 @@
           "version": "1.0.2",
           "code": 100010,
           "date": "2025-11-14",
-          "url": ""
+          "url": "https://github.com/skillerious/Version-Tracker-Editor"
         },
         {
           "version": "1.0.1",
