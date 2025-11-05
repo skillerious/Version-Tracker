@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-11-05T23:20:03Z",
+  "generated": "2025-11-05T23:20:41Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -170,30 +170,44 @@
       "name": "ModNinja",
       "tracks": {
         "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
+          "version": "1.0.0",
+          "code": 1,
+          "date": "2025-11-05",
           "url": "https://github.com/skillerious/ModNinja/releases",
           "download": "https://github.com/skillerious/ModNinja/releases/latest",
           "notes": "View and export Vortex mod lists."
         }
       },
-      "history": []
+      "history": [
+        {
+          "version": "1.0.0",
+          "code": 1,
+          "date": "2025-11-05",
+          "url": "https://github.com/skillerious/ModNinja/releases"
+        }
+      ]
     },
     {
       "id": "website",
       "name": "Website",
       "tracks": {
         "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
+          "version": "1.0.0",
+          "code": 1,
+          "date": "2025-10-15",
           "url": "https://github.com/skillerious/Website/releases",
           "download": "https://github.com/skillerious/Website/releases/latest",
           "notes": "Markiva marketing site."
         }
       },
-      "history": []
+      "history": [
+        {
+          "version": "1.0.0",
+          "code": 1,
+          "date": "2025-10-15",
+          "url": "https://github.com/skillerious/Website/releases"
+        }
+      ]
     },
     {
       "id": "ytaudio",
