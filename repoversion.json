@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-11-05T23:10:03Z",
+  "generated": "2025-11-05T23:11:33Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -10,7 +10,7 @@
         "stable": {
           "version": "2.6.1",
           "code": 206010,
-          "date": "2025-11-02",
+          "date": "2025-11-05",
           "url": "https://github.com/skillerious/Version-Tracker-Editor",
           "download": "https://github.com/skillerious/Version-Tracker-Editor/releases",
           "notes": "What is new in this version.\n* New update logic\n* General bug fixes\n* Performace Enhancements"
@@ -20,7 +20,7 @@
         {
           "version": "2.6.1",
           "code": 206010,
-          "date": "2025-11-02",
+          "date": "2025-11-05",
           "url": "https://github.com/skillerious/Version-Tracker-Editor"
         },
         {
