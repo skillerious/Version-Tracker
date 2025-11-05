@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-11-05T23:11:33Z",
+  "generated": "2025-11-05T23:20:03Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -148,15 +148,22 @@
       "name": "CleanName",
       "tracks": {
         "stable": {
-          "version": "",
-          "code": 0,
-          "date": "",
+          "version": "1.0.0",
+          "code": 1,
+          "date": "2025-06-04",
           "url": "https://github.com/skillerious/CleanName/releases",
           "download": "https://github.com/skillerious/CleanName/releases/latest",
           "notes": "File re-namer with loads of features."
         }
       },
-      "history": []
+      "history": [
+        {
+          "version": "1.0.0",
+          "code": 1,
+          "date": "2025-06-04",
+          "url": "https://github.com/skillerious/CleanName/releases"
+        }
+      ]
     },
     {
       "id": "modninja",
