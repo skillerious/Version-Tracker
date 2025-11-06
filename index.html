@@ -1,11 +1,11 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="color-scheme" content="dark light" />
-  <title>App Versions — Skillerious (Robin Doak)</title>
-  <meta name="description" content="Version dashboard & machine-readable endpoints for Skillerious — Robin Doak apps." />
+  <title>App Versions â€” Skillerious (Robin Doak)</title>
+  <meta name="description" content="Version dashboard & machine-readable endpoints for Skillerious â€” Robin Doak apps." />
 
   <!-- Site icon -->
   <link rel="icon" href="assets/icon.ico" sizes="any" />
@@ -40,13 +40,13 @@
               <span class="owner-name">Robin Doak</span>
             </a>
             <span class="updated-pill">
-              <span class="dot dot-pulse"></span><span id="updated-badge">Updated…</span>
+              <span class="dot dot-pulse"></span><span id="updated-badge">Updated...</span>
             </span>
           </div>
 
           <div class="hero-chips">
             <span class="chip spec">Spec <strong>v<span id="schema-ver">2</span></strong>
-              <small>• Endpoints: json / txt / ini / code</small></span>
+              <small>â€¢ Endpoints: json / txt / ini / code</small></span>
 
             <span class="chip stat" title="Total apps listed">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -70,25 +70,78 @@
 
   <!-- ===== Main ===== -->
   <main class="main">
+    <div class="notice" id="notice" role="status" aria-live="polite" hidden></div>
+
     <!-- Filters -->
     <div class="toolbar" role="region" aria-label="Filters">
-      <input id="q" class="input" type="search" placeholder="Search apps…" aria-label="Search apps" />
+      <input id="q" class="input" type="search" placeholder="Search apps..." aria-label="Search apps" />
       <select id="track" aria-label="Filter by track">
         <option value="all">All tracks</option>
         <option value="stable" selected>Stable</option>
         <option value="beta">Beta</option>
       </select>
       <select id="sort" aria-label="Sort">
-        <option value="code_desc" selected>Newest by code ↓</option>
-        <option value="code_asc">Oldest by code ↑</option>
-        <option value="name_asc">Name A–Z</option>
-        <option value="name_desc">Name Z–A</option>
+        <option value="code_desc" selected>Newest by code</option>
+        <option value="code_asc">Oldest by code</option>
+        <option value="date_desc">Newest by date</option>
+        <option value="date_asc">Oldest by date</option>
+        <option value="name_asc">Name A-Z</option>
+        <option value="name_desc">Name Z-A</option>
+        <option value="issues_first">Issues first</option>
       </select>
       <div class="spacer"></div>
       <button class="btn" id="btn-copy-json" type="button">Copy JSON URL</button>
       <button class="btn ok" id="btn-download-json" type="button">Download JSON</button>
     </div>
+    <section class="health" aria-label="Data quality overview">
+      <div class="health-summary">
+        <div class="metric">
+          <span class="metric-label">Total rows</span>
+          <span class="metric-value" id="metric-total">0</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Matching filters</span>
+          <span class="metric-value" id="metric-visible">0</span>
+        </div>
+        <div class="metric warn">
+          <span class="metric-label">Rows with issues</span>
+          <span class="metric-value" id="metric-issues">0</span>
+        </div>
+        <div class="metric stale">
+          <span class="metric-label">Stale releases</span>
+          <span class="metric-value" id="metric-stale">0</span>
+        </div>
+        <div class="metric ok">
+          <span class="metric-label">Healthy rows</span>
+          <span class="metric-value" id="metric-healthy">0</span>
+        </div>
+      </div>
 
+      <div class="health-controls" role="group" aria-label="Advanced filters">
+        <label class="chip-toggle">
+          <input type="checkbox" id="filter-issues" />
+          <span>Issues only</span>
+        </label>
+        <label class="chip-toggle">
+          <input type="checkbox" id="filter-stale" />
+          <span>Stale only</span>
+        </label>
+        <label class="chip-toggle">
+          <input type="checkbox" id="filter-missing" />
+          <span>Missing links</span>
+        </label>
+        <label class="chip-toggle">
+          <input type="checkbox" id="filter-future" />
+          <span>Future dated</span>
+        </label>
+        <button class="btn ghost" id="btn-reset-filters" type="button">Reset filters</button>
+      </div>
+    </section>
+
+    <div class="diagnostics" id="diagnostics" hidden>
+      <strong class="diagnostics-title">Data warnings</strong>
+      <ul class="diagnostics-list" id="diagnostics-list"></ul>
+    </div>
     <!-- Endpoints -->
     <section class="endpoints" aria-label="Endpoints">
       <div class="ep-controls">
@@ -97,13 +150,13 @@
         <!-- Custom picker -->
         <div class="picker" id="app-picker" aria-expanded="false">
           <button class="picker-btn" id="picker-btn" aria-haspopup="listbox" aria-expanded="false" type="button">
-            <span class="value" id="picker-value">Loading…</span>
+            <span class="value" id="picker-value">Loading...</span>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
           <div class="picker-panel" id="picker-panel">
-            <input class="picker-search" id="picker-search" placeholder="Search app…" />
+            <input class="picker-search" id="picker-search" placeholder="Search apps..." />
             <ul class="picker-list" id="picker-list" role="listbox" tabindex="-1" aria-label="Choose app"></ul>
           </div>
         </div>
@@ -149,7 +202,7 @@
             </a>
           </div>
         </div>
-        <div class="ep-note">Compact map of id → {version, code}</div>
+        <div class="ep-note">Compact map of id -> {version, code}</div>
       </div>
 
       <div class="ep-row">
@@ -197,7 +250,7 @@
 
     <!-- Desktop table -->
     <section class="table-wrap" aria-label="Versions table (desktop)">
-      <div class="table-head">Human view • Use endpoints above for apps</div>
+      <div class="table-head">Human view â€¢ Use endpoints above for apps</div>
       <div class="scroll">
         <table id="apps-table">
           <thead>
@@ -208,6 +261,7 @@
               <th class="col-version">Version</th>
               <th class="col-code">Code</th>
               <th class="col-date">Date</th>
+              <th class="col-status">Status</th>
               <th class="col-links">Links</th>
             </tr>
           </thead>
@@ -432,4 +486,14 @@
 <script src="app.js" defer></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
 

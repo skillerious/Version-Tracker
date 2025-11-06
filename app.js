@@ -5,23 +5,129 @@
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const qs = new URLSearchParams(location.search);
 
+  const STORAGE_KEY = 'vc.filters.v2';
+  const CACHE_KEY = 'vc.cache.primary';
+  const CACHE_TS_KEY = 'vc.cache.primary.ts';
+  const STATE_PERSIST_DELAY = 220;
+  const STALE_AFTER_DAYS = 90;
+  const FUTURE_GRACE_DAYS = 2;
+  const SEVERITY_ORDER = { error: 0, warn: 1, info: 2, ok: 3 };
+
+  const toNumber = (value) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const escapeHtml = (value) =>
+    String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+  const escapeAttribute = (value) =>
+    escapeHtml(value).replace(/`/g, '&#96;');
+
+  const clamp = (value, min, max) =>
+    Math.min(max, Math.max(min, value));
+
+  function sanitizeLink(url) {
+    if (!url) return null;
+    const str = String(url).trim();
+    if (!str) return null;
+    const lowered = str.toLowerCase();
+    if (lowered.startsWith('javascript:') || lowered.startsWith('data:')) return null;
+    return str;
+  }
+
+  function formatRelativeDuration(ms) {
+    if (!Number.isFinite(ms) || ms <= 0) return '';
+    const minutes = Math.floor(ms / 60000);
+    if (minutes < 1) return 'moments ago';
+    if (minutes < 60) return `${minutes} min ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hr${hours === 1 ? '' : 's'} ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`;
+    const weeks = Math.floor(days / 7);
+    if (weeks < 5) return `${weeks} wk${weeks === 1 ? '' : 's'} ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months} mo${months === 1 ? '' : 's'} ago`;
+    const years = Math.floor(days / 365);
+    return `${years} yr${years === 1 ? '' : 's'} ago`;
+  }
+
+  function safeLocalStorage(fn) {
+    try {
+      return fn();
+    } catch {
+      return null;
+    }
+  }
+
   /* ----------------------- data ----------------------- */
-  async function loadData() {
+  async function loadData(runtime = {}) {
+    const run = (runtime && typeof runtime === 'object') ? runtime : {};
+    run.messages = Array.isArray(run.messages) ? run.messages : [];
+
+    const cached = safeLocalStorage(() => {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      const tsRaw = localStorage.getItem(CACHE_TS_KEY);
+      const ts = tsRaw ? Number(tsRaw) : null;
+      return { data, ts: Number.isFinite(ts) ? ts : null };
+    });
+
     try {
       const res = await fetch('repoversion.json', { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return await res.json();
-    } catch (e) {
+      const json = await res.json();
+      safeLocalStorage(() => {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(json));
+        localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
+      });
+      run.source = 'live';
+      run.usedCache = false;
+      return json;
+    } catch (err) {
+      const message = err && err.message ? err.message : String(err);
+      run.messages.push({
+        type: 'error',
+        text: `Live fetch failed (${message})`
+      });
+      if (cached?.data) {
+        run.source = 'cache';
+        run.usedCache = true;
+        if (cached.ts && Number.isFinite(cached.ts)) {
+          run.cacheTimestamp = cached.ts;
+          const age = Date.now() - cached.ts;
+          run.cacheAge = age;
+          const rel = formatRelativeDuration(age) || 'earlier';
+          run.messages.push({
+            type: 'warn',
+            text: `Serving cached data (${rel}).`
+          });
+        } else {
+          run.messages.push({
+            type: 'warn',
+            text: 'Serving cached data from a previous visit.'
+          });
+        }
+        return cached.data;
+      }
+
       document.body.innerHTML =
         '<pre class="json-out">' +
         JSON.stringify(
-          { error: 'Failed to load repoversion.json', detail: String(e) },
+          { error: 'Failed to load repoversion.json', detail: String(err) },
           null,
           2
         ) +
         '</pre>';
       document.title = 'versions.json';
-      throw e;
+      throw err;
     }
   }
 
@@ -161,7 +267,7 @@ download=${L.download ?? ''}\n`;
   }
 
   /* -------------------- interactive UI -------------------- */
-  function initInteractive(data) {
+  function initInteractive(data, runtime = {}) {
     const setText = (el, v) => { if (el) el.textContent = v; };
 
     setText($('#schema-ver'), String(data.schemaVersion || '2'));
@@ -184,62 +290,610 @@ download=${L.download ?? ''}\n`;
       });
       setText($('#updated-badge'), `Updated ${d} • ${t} UTC`);
     } catch {
-      setText($('#updated-badge'), data.generated || '—');
+      setText($('#updated-badge'), data.generated || '--');
     }
 
     const qInput = $('#q'),
       trackSel = $('#track'),
       sortSel = $('#sort'),
       tbody = $('#apps-body'),
-      list = $('#m-list');
+      list = $('#m-list'),
+      noticeEl = $('#notice'),
+      diagnosticsEl = $('#diagnostics'),
+      diagnosticsListEl = $('#diagnostics-list'),
+      metrics = {
+        total: $('#metric-total'),
+        visible: $('#metric-visible'),
+        issues: $('#metric-issues'),
+        stale: $('#metric-stale'),
+        healthy: $('#metric-healthy')
+      },
+      toggleIssues = $('#filter-issues'),
+      toggleStale = $('#filter-stale'),
+      toggleMissing = $('#filter-missing'),
+      toggleFuture = $('#filter-future'),
+      resetFiltersBtn = $('#btn-reset-filters');
 
     const display = {
-      version: (v) => (v && String(v).trim() ? v : '—'),
-      codeText: (c) => (c && Number(c) !== 0 ? String(c) : '—'),
+      version: (v) => (v && String(v).trim() ? v : '--'),
+      codeText: (c) => (c && Number(c) !== 0 ? String(c) : '--'),
       codeValue: (c) => c ?? 0
     };
 
-    const toRows = () => {
-      const rows = [];
-      for (const app of data.apps || []) {
-        for (const [track, latest] of Object.entries(app.tracks || {})) {
-          rows.push({ app, track, latest });
-        }
+    const runtimeInfo =
+      runtime && typeof runtime === 'object' ? runtime : {};
+    const baseRows = buildRows(data);
+    const datasetSummary = summariseRows(baseRows.rows);
+    if (metrics.total) metrics.total.textContent = String(datasetSummary.total);
+    if (metrics.visible) metrics.visible.textContent = String(datasetSummary.total);
+    if (metrics.issues) metrics.issues.textContent = String(datasetSummary.issues);
+    if (metrics.stale) metrics.stale.textContent = String(datasetSummary.stale);
+    if (metrics.healthy) metrics.healthy.textContent = String(datasetSummary.healthy);
+    const DEFAULT_FILTER_STATE = normalizeState({
+      q: '',
+      track: trackSel?.value || 'stable',
+      sort: sortSel?.value || 'code_desc',
+      toggles: {
+        issues: false,
+        stale: false,
+        missing: false,
+        future: false
       }
-      return rows;
-    };
+    });
+    const state = loadInitialState();
+    applyStateToControls();
+    showDiagnostics(baseRows.warnings);
+
+    const toRows = () => baseRows.rows.slice();
 
     function applyFilters(rows) {
-      const q = (qInput?.value || '').toLowerCase().trim();
-      const t = (trackSel?.value || 'all').toLowerCase();
-      let out = rows.filter((r) => {
-        const hit =
-          !q ||
-          r.app.id.toLowerCase().includes(q) ||
-          (r.app.name || '').toLowerCase().includes(q) ||
-          String(r.latest.code ?? '').includes(q) ||
-          String(r.latest.version || '').toLowerCase().includes(q);
-        const tk = t === 'all' || r.track === t;
-        return hit && tk;
+      const parsed = parseQuery(state.q);
+      const out = rows.filter((r) => {
+        if (state.track !== 'all' && r.track !== state.track) return false;
+        if (state.toggles.issues && !r.meta.hasIssues) return false;
+        if (state.toggles.stale && !r.meta.flags.stale) return false;
+        if (state.toggles.missing && !r.meta.flags.missingLinks) return false;
+        if (state.toggles.future && !r.meta.flags.future) return false;
+        return matchesQuery(r, parsed);
       });
-      switch (sortSel?.value) {
-        case 'code_asc':
-          out.sort((a, b) => (a.latest.code ?? 0) - (b.latest.code ?? 0));
-          break;
-        case 'name_asc':
-          out.sort((a, b) =>
-            (a.app.name || a.app.id).localeCompare(b.app.name || b.app.id)
-          );
-          break;
-        case 'name_desc':
-          out.sort((a, b) =>
-            (b.app.name || b.app.id).localeCompare(a.app.name || a.app.id)
-          );
-          break;
-        default:
-          out.sort((a, b) => (b.latest.code ?? 0) - (a.latest.code ?? 0));
-      }
+      const sorter = sortRows(state.sort);
+      out.sort(sorter);
       return out;
+    }
+
+    function buildRows(source) {
+      const warnings = [];
+      const rows = [];
+      const appList = [];
+
+      const apps = Array.isArray(source.apps) ? source.apps : [];
+      if (!Array.isArray(source.apps)) {
+        warnings.push('apps array missing or invalid.');
+      }
+
+      apps.forEach((app, index) => {
+        if (!app || typeof app !== 'object') {
+          warnings.push(`App at index ${index} is not an object.`);
+          return;
+        }
+        const appId = (app.id && String(app.id).trim()) || '';
+        if (!appId) {
+          warnings.push(`App entry ${index + 1} is missing an id.`);
+          return;
+        }
+        const appName = typeof app.name === 'string' ? app.name : '';
+        const tracks = app.tracks && typeof app.tracks === 'object' ? app.tracks : null;
+        if (!tracks) {
+          warnings.push(`App "${appId}" has no tracks.`);
+          return;
+        }
+        const entries = Object.entries(tracks).filter(([, info]) => info && typeof info === 'object');
+        if (!entries.length) {
+          warnings.push(`App "${appId}" has empty track metadata.`);
+          return;
+        }
+        appList.push({ id: appId, name: appName });
+        const stableTrack = tracks.stable && typeof tracks.stable === 'object' ? tracks.stable : null;
+        const stableCode = stableTrack ? toNumber(stableTrack.code) : null;
+
+        entries.forEach(([trackName, info]) => {
+          const trackKey = (trackName || '').toLowerCase() || 'stable';
+          const latest = info && typeof info === 'object' ? info : {};
+          const meta = analyseEntry(appId, appName, trackKey, latest, stableCode);
+          rows.push({ app, track: trackKey, latest, meta });
+        });
+      });
+
+      return { rows, apps: appList, warnings };
+    }
+
+    function analyseEntry(appId, appName, trackKey, latest, stableCode) {
+      const versionText = display.version(latest.version);
+      const codeNum = toNumber(latest.code);
+      const codeLabel = codeNum === null ? '--' : String(codeNum);
+      const codeTitle = codeNum === null ? 'Code not provided' : `Code ${codeNum}`;
+      const notes = typeof latest.notes === 'string' ? latest.notes : '';
+      const hasDownload = !!sanitizeLink(latest.download);
+      const hasUrl = !!sanitizeLink(latest.url);
+
+      const dateInfo = parseRowDate(latest.date);
+
+      const badges = [];
+      const flags = {
+        stale: dateInfo.stale,
+        future: dateInfo.future,
+        missingLinks: false,
+        missingVersion: versionText === '--',
+        missingCode: codeNum === null,
+        missingDate: dateInfo.missing,
+        hasNotes: !!notes,
+        hasDownload,
+        hasUrl,
+        behindStable: false
+      };
+
+      if (flags.missingVersion) {
+        badges.push({ id: 'missing-version', label: 'Missing version', tone: 'error' });
+      }
+      if (flags.missingCode) {
+        badges.push({ id: 'missing-code', label: 'Invalid code', tone: 'error' });
+      } else if (codeNum !== null && codeNum <= 0) {
+        badges.push({ id: 'low-code', label: 'Code <= 0', tone: 'warn' });
+      }
+
+      if (dateInfo.missing) {
+        badges.push({ id: 'missing-date', label: 'Missing date', tone: 'warn' });
+      } else if (dateInfo.invalid) {
+        badges.push({ id: 'invalid-date', label: 'Invalid date', tone: 'warn' });
+      }
+      if (flags.stale) {
+        badges.push({ id: 'stale', label: `Stale (${dateInfo.staleDays}d)`, tone: 'warn' });
+      }
+      if (flags.future) {
+        badges.push({ id: 'future', label: `In ${dateInfo.futureDays}d`, tone: 'warn' });
+      }
+
+      if (!hasUrl && !hasDownload) {
+        badges.push({ id: 'missing-links', label: 'Missing links', tone: 'warn' });
+        flags.missingLinks = true;
+      } else if (!hasUrl || !hasDownload) {
+        badges.push({
+          id: hasUrl ? 'missing-download' : 'missing-release',
+          label: hasUrl ? 'No download link' : 'No release link',
+          tone: 'info'
+        });
+      }
+      if (notes) {
+        badges.push({ id: 'notes', label: 'Notes available', tone: 'info' });
+      }
+
+      if (stableCode !== null && trackKey !== 'stable' && codeNum !== null) {
+        if (codeNum < stableCode) {
+          badges.push({ id: 'behind-stable', label: 'Behind stable', tone: 'warn' });
+          flags.behindStable = true;
+        } else if (codeNum > stableCode) {
+          badges.push({ id: 'ahead-stable', label: 'Ahead of stable', tone: 'info' });
+        }
+      }
+
+      let severity = 'ok';
+      for (const badge of badges) {
+        if (badge.tone === 'error') {
+          severity = 'error';
+          break;
+        }
+        if (badge.tone === 'warn' && severity !== 'error') {
+          severity = 'warn';
+        } else if (badge.tone === 'info' && severity === 'ok') {
+          severity = 'info';
+        }
+      }
+      const hasIssues = severity === 'error' || severity === 'warn';
+
+      badges.sort((a, b) => {
+        const rank = (tone) =>
+          tone === 'error' ? 0 : tone === 'warn' ? 1 : tone === 'info' ? 2 : 3;
+        return rank(a.tone) - rank(b.tone);
+      });
+
+      const searchParts = [
+        appId,
+        appName || '',
+        trackKey,
+        versionText,
+        codeLabel,
+        dateInfo.original || '',
+        notes,
+        String(latest.url || ''),
+        String(latest.download || '')
+      ];
+
+      return {
+        versionText,
+        code: codeNum,
+        codeLabel,
+        codeTitle,
+        dateValue: dateInfo.value,
+        dateDisplay: dateInfo.display,
+        dateTitle: dateInfo.title,
+        badges,
+        flags,
+        hasIssues,
+        severity,
+        searchText: searchParts.join(' ').toLowerCase()
+      };
+    }
+
+    function parseRowDate(raw) {
+      if (!raw) {
+        return {
+          original: '',
+          value: null,
+          display: '--',
+          title: 'No release date provided',
+          missing: true,
+          invalid: false,
+          stale: false,
+          future: false,
+          staleDays: 0,
+          futureDays: 0
+        };
+      }
+      const dt = new Date(raw);
+      if (Number.isNaN(dt.valueOf())) {
+        return {
+          original: raw,
+          value: null,
+          display: '--',
+          title: `Invalid date: ${raw}`,
+          missing: false,
+          invalid: true,
+          stale: false,
+          future: false,
+          staleDays: 0,
+          futureDays: 0
+        };
+      }
+      const value = dt.getTime();
+      const diffMs = Date.now() - value;
+      const diffDays = Math.round(diffMs / 86400000);
+      const stale = diffDays > STALE_AFTER_DAYS;
+      const future = diffDays < -FUTURE_GRACE_DAYS;
+      let relative = '';
+      if (diffDays === 0) relative = 'today';
+      else if (diffDays > 0) relative = `${diffDays}d ago`;
+      else relative = `in ${Math.abs(diffDays)}d`;
+      const iso = dt.toISOString().slice(0, 10);
+      return {
+        original: raw,
+        value,
+        display: relative ? `${iso} (${relative})` : iso,
+        title: `Release date ${iso}`,
+        missing: false,
+        invalid: false,
+        stale,
+        future,
+        staleDays: diffDays,
+        futureDays: Math.abs(diffDays)
+      };
+    }
+
+    function summariseRows(rows) {
+      const summary = {
+        total: rows.length,
+        issues: 0,
+        stale: 0,
+        healthy: 0,
+        missingLinks: 0,
+        future: 0
+      };
+      rows.forEach((r) => {
+        if (r.meta.hasIssues) summary.issues += 1;
+        else if (r.meta.severity === 'ok') summary.healthy += 1;
+        if (r.meta.flags.stale) summary.stale += 1;
+        if (r.meta.flags.future) summary.future += 1;
+        if (r.meta.flags.missingLinks) summary.missingLinks += 1;
+      });
+      return summary;
+    }
+
+    function parseQuery(raw) {
+      const tokens = (raw || '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+      const terms = [];
+      const filters = [];
+      tokens.forEach((token) => {
+        const match = token.match(/^([a-z_]+)(:|<=|>=|=|<|>)(.+)$/i);
+        if (match) {
+          filters.push({
+            key: match[1].toLowerCase(),
+            op: match[2],
+            value: match[3].toLowerCase()
+          });
+        } else {
+          terms.push(token.toLowerCase());
+        }
+      });
+      return { terms, filters };
+    }
+
+    function matchesQuery(row, parsed) {
+      if (!parsed.terms.length && !parsed.filters.length) return true;
+      for (const term of parsed.terms) {
+        if (!row.meta.searchText.includes(term)) return false;
+      }
+      for (const filter of parsed.filters) {
+        if (!matchFilter(row, filter)) return false;
+      }
+      return true;
+    }
+
+    function matchFilter(row, filter) {
+      const { key, op, value } = filter;
+      switch (key) {
+        case 'id':
+        case 'app':
+          return textMatch(row.app.id, value, op);
+        case 'name':
+          return textMatch(row.app.name || '', value, op);
+        case 'track':
+          return textMatch(row.track, value, op, true);
+        case 'status':
+          if (value === 'issues') return row.meta.hasIssues;
+          if (value === 'error') return row.meta.severity === 'error';
+          if (value === 'warn' || value === 'warning') return row.meta.severity === 'warn';
+          if (value === 'info') return row.meta.severity === 'info';
+          if (value === 'ok' || value === 'healthy') return row.meta.severity === 'ok';
+          if (value === 'stale') return row.meta.flags.stale;
+          if (value === 'future') return row.meta.flags.future;
+          if (value === 'missing') return row.meta.flags.missingLinks;
+          return false;
+        case 'has':
+          if (value === 'notes') return row.meta.flags.hasNotes;
+          if (value === 'download') return row.meta.flags.hasDownload;
+          if (value === 'url' || value === 'release') return row.meta.flags.hasUrl;
+          return false;
+        case 'missing':
+          if (value === 'notes') return !row.meta.flags.hasNotes;
+          if (value === 'download') return !row.meta.flags.hasDownload;
+          if (value === 'url' || value === 'release') return !row.meta.flags.hasUrl;
+          if (value === 'date') return row.meta.flags.missingDate;
+          return false;
+        case 'code':
+          return compareNumber(row.meta.code, value, op);
+        case 'date':
+        case 'released':
+          return compareDate(row.meta.dateValue, value, op);
+        default:
+          return row.meta.searchText.includes(value);
+      }
+    }
+
+    function textMatch(actual, target, op, exactOnly = false) {
+      const a = String(actual || '').toLowerCase();
+      const b = String(target || '').toLowerCase();
+      if (!op || op === ':') {
+        return exactOnly ? a === b : a.includes(b);
+      }
+      if (op === '=') {
+        return a === b;
+      }
+      return exactOnly ? a === b : a.includes(b);
+    }
+
+    function compareNumber(actual, rawValue, op) {
+      const expected = toNumber(rawValue);
+      if (expected === null || actual === null) return false;
+      switch (op) {
+        case '>':
+          return actual > expected;
+        case '<':
+          return actual < expected;
+        case '>=':
+          return actual >= expected;
+        case '<=':
+          return actual <= expected;
+        case '=':
+        case ':':
+          return actual === expected;
+        default:
+          return false;
+      }
+    }
+
+    function compareDate(actualValue, rawValue, op) {
+      if (!rawValue || actualValue === null) return false;
+      const parsed = new Date(rawValue);
+      if (Number.isNaN(parsed.valueOf())) return false;
+      const expected = parsed.getTime();
+      switch (op) {
+        case '>':
+          return actualValue > expected;
+        case '<':
+          return actualValue < expected;
+        case '>=':
+          return actualValue >= expected;
+        case '<=':
+          return actualValue <= expected;
+        case '=':
+        case ':':
+          return Math.abs(actualValue - expected) < 86400000;
+        default:
+          return false;
+      }
+    }
+
+    function sortRows(key) {
+      switch (key) {
+        case 'code_asc':
+          return (a, b) => (a.meta.code ?? Number.POSITIVE_INFINITY) - (b.meta.code ?? Number.POSITIVE_INFINITY);
+        case 'name_asc':
+          return (a, b) => (a.app.name || a.app.id).localeCompare(b.app.name || b.app.id);
+        case 'name_desc':
+          return (a, b) => (b.app.name || b.app.id).localeCompare(a.app.name || a.app.id);
+        case 'date_asc':
+          return (a, b) => (a.meta.dateValue ?? Number.POSITIVE_INFINITY) - (b.meta.dateValue ?? Number.POSITIVE_INFINITY);
+        case 'date_desc':
+          return (a, b) => (b.meta.dateValue ?? Number.NEGATIVE_INFINITY) - (a.meta.dateValue ?? Number.NEGATIVE_INFINITY);
+        case 'issues_first':
+          return (a, b) => {
+            const severityRank = (s) =>
+              s === 'error' ? 0 : s === 'warn' ? 1 : s === 'info' ? 2 : 3;
+            const diff = severityRank(a.meta.severity) - severityRank(b.meta.severity);
+            if (diff !== 0) return diff;
+            return (b.meta.dateValue ?? Number.NEGATIVE_INFINITY) - (a.meta.dateValue ?? Number.NEGATIVE_INFINITY);
+          };
+        default:
+          return (a, b) => (b.meta.code ?? Number.NEGATIVE_INFINITY) - (a.meta.code ?? Number.NEGATIVE_INFINITY);
+      }
+    }
+
+    function loadInitialState() {
+      const base = {
+        q: qInput?.value || '',
+        track: trackSel?.value || 'stable',
+        sort: sortSel?.value || 'code_desc',
+        toggles: {
+          issues: !!toggleIssues?.checked,
+          stale: !!toggleStale?.checked,
+          missing: !!toggleMissing?.checked,
+          future: !!toggleFuture?.checked
+        }
+      };
+      const stored = readStoredState();
+      const fromUrl = readUrlState();
+      return normalizeState(DEFAULT_FILTER_STATE, base, stored, fromUrl);
+    }
+
+    function applyStateToControls() {
+      if (qInput) qInput.value = state.q;
+      if (trackSel) trackSel.value = state.track;
+      if (sortSel) sortSel.value = state.sort;
+      if (toggleIssues) toggleIssues.checked = state.toggles.issues;
+      if (toggleStale) toggleStale.checked = state.toggles.stale;
+      if (toggleMissing) toggleMissing.checked = state.toggles.missing;
+      if (toggleFuture) toggleFuture.checked = state.toggles.future;
+    }
+
+    let persistHandle = null;
+    function persistState(immediate = false) {
+      if (immediate) {
+        writeStoredState();
+        writeUrlState();
+        return;
+      }
+      clearTimeout(persistHandle);
+      persistHandle = setTimeout(() => {
+        writeStoredState();
+        writeUrlState();
+      }, STATE_PERSIST_DELAY);
+    }
+
+    function normalizeState(...sources) {
+      const result = {
+        q: '',
+        track: 'stable',
+        sort: 'code_desc',
+        toggles: {
+          issues: false,
+          stale: false,
+          missing: false,
+          future: false
+        }
+      };
+      sources.forEach((src) => {
+        if (!src) return;
+        if (typeof src.q === 'string') result.q = src.q.slice(0, 200);
+        if (typeof src.track === 'string') result.track = normalizeTrackValue(src.track);
+        if (typeof src.sort === 'string') result.sort = normalizeSortValue(src.sort);
+        const toggles = src.toggles || src;
+        if (toggles) {
+          if (typeof toggles.issues !== 'undefined') result.toggles.issues = !!toggles.issues;
+          if (typeof toggles.stale !== 'undefined') result.toggles.stale = !!toggles.stale;
+          if (typeof toggles.missing !== 'undefined') result.toggles.missing = !!toggles.missing;
+          if (typeof toggles.future !== 'undefined') result.toggles.future = !!toggles.future;
+        }
+      });
+      return result;
+    }
+
+    function normalizeTrackValue(value) {
+      const v = String(value || '').toLowerCase();
+      return v === 'all' || v === 'beta' || v === 'stable' ? v : 'stable';
+    }
+
+    function normalizeSortValue(value) {
+      const allowed = new Set([
+        'code_desc',
+        'code_asc',
+        'name_asc',
+        'name_desc',
+        'date_asc',
+        'date_desc',
+        'issues_first'
+      ]);
+      return allowed.has(value) ? value : 'code_desc';
+    }
+
+    function readStoredState() {
+      return (
+        safeLocalStorage(() => {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : null;
+        }) || {}
+      );
+    }
+
+    function writeStoredState() {
+      safeLocalStorage(() => {
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({
+            q: state.q,
+            track: state.track,
+            sort: state.sort,
+            toggles: state.toggles
+          })
+        );
+      });
+    }
+
+    function readUrlState() {
+      const params = new URLSearchParams(location.search);
+      if (params.get('format')) return {};
+      const out = {};
+      if (params.has('q')) out.q = params.get('q');
+      if (params.has('track')) out.track = params.get('track');
+      if (params.has('sort')) out.sort = params.get('sort');
+      ['issues', 'stale', 'missing', 'future'].forEach((key) => {
+        if (params.has(key)) {
+          const value = params.get(key);
+          out[key] = value === '1' || value === 'true' || value === 'yes';
+        }
+      });
+      return out;
+    }
+
+    function writeUrlState() {
+      const url = new URL(location.href);
+      const params = url.searchParams;
+      params.delete('format');
+      params.delete('app');
+      params.delete('latest');
+      ['q', 'track', 'sort', 'issues', 'stale', 'missing', 'future'].forEach((key) => {
+        params.delete(key);
+      });
+      if (state.q) params.set('q', state.q);
+      if (state.track && state.track !== 'stable') params.set('track', state.track);
+      if (state.sort && state.sort !== 'code_desc') params.set('sort', state.sort);
+      if (state.toggles.issues) params.set('issues', '1');
+      if (state.toggles.stale) params.set('stale', '1');
+      if (state.toggles.missing) params.set('missing', '1');
+      if (state.toggles.future) params.set('future', '1');
+      url.search = params.toString();
+      history.replaceState(null, '', url);
     }
 
     function renderTable(rows) {
@@ -247,26 +901,61 @@ download=${L.download ?? ''}\n`;
       tbody.innerHTML = '';
       for (const r of rows) {
         const tr = document.createElement('tr');
-        const links = [];
-        if (r.latest.url)
-          links.push(
-            `<a href="${r.latest.url}" target="_blank" rel="noopener">release</a>`
-          );
-        if (r.latest.download)
-          links.push(
-            `<a href="${r.latest.download}" target="_blank" rel="noopener">download</a>`
-          );
-        if (r.latest.notes) links.push(`<span title="${r.latest.notes}">notes</span>`);
+        applySeverityClass(tr, r.meta.severity);
+        const linkContent = buildLinksHtml(r);
         tr.innerHTML = `
-          <td><strong>${r.app.name || r.app.id}</strong></td>
-          <td class="id">${r.app.id}</td>
-          <td><span class="pill ${r.track === 'beta' ? 'beta' : 'ok'}">${r.track}</span></td>
-          <td class="mono">${display.version(r.latest.version)}</td>
-          <td class="mono">${display.codeText(r.latest.code)}</td>
-          <td>${r.latest.date ?? '—'}</td>
-          <td class="links">${links.join(' · ')}</td>`;
+          <td><strong>${escapeHtml(r.app.name || r.app.id)}</strong></td>
+          <td class="id">${escapeHtml(r.app.id)}</td>
+          <td><span class="pill ${r.track === 'beta' ? 'beta' : 'ok'}">${escapeHtml(r.track)}</span></td>
+          <td class="mono">${escapeHtml(r.meta.versionText)}</td>
+          <td class="mono" title="${escapeAttribute(r.meta.codeTitle)}">${escapeHtml(r.meta.codeLabel)}</td>
+          <td title="${escapeAttribute(r.meta.dateTitle)}">${escapeHtml(r.meta.dateDisplay)}</td>
+          <td class="status-cell">${renderStatusBadges(r.meta)}</td>
+          <td class="links">${linkContent}</td>`;
         tbody.appendChild(tr);
       }
+    }
+
+    function renderStatusBadges(meta) {
+      if (!meta.badges.length) {
+        return '<span class="status-pill ok">Healthy</span>';
+      }
+      return meta.badges
+        .map((badge) => {
+          const tone = badge.tone || 'info';
+          const title = badge.description ? ` title="${escapeAttribute(badge.description)}"` : '';
+          return `<span class="status-pill ${tone}"${title}>${escapeHtml(badge.label)}</span>`;
+        })
+        .join(' ');
+    }
+
+    function buildLinksHtml(row) {
+      const parts = [];
+      const release = sanitizeLink(row.latest.url);
+      if (release) {
+        parts.push(
+          `<a href="${escapeAttribute(release)}" target="_blank" rel="noopener">release</a>`
+        );
+      }
+      const download = sanitizeLink(row.latest.download);
+      if (download) {
+        parts.push(
+          `<a href="${escapeAttribute(download)}" target="_blank" rel="noopener">download</a>`
+        );
+      }
+      if (row.meta.flags.hasNotes) {
+        parts.push(
+          `<span title="${escapeAttribute(row.latest.notes || '')}">notes</span>`
+        );
+      }
+      return parts.length ? parts.join(' | ') : '--';
+    }
+
+    function applySeverityClass(el, severity) {
+      if (!el) return;
+      if (severity === 'error') el.classList.add('row-error');
+      else if (severity === 'warn') el.classList.add('row-warn');
+      else if (severity === 'info') el.classList.add('row-info');
     }
 
     function chevronSVG() {
@@ -280,42 +969,38 @@ download=${L.download ?? ''}\n`;
       for (const r of rows) {
         const li = document.createElement('li');
         li.className = 'm-item';
+        applySeverityClass(li, r.meta.severity);
         li.setAttribute('aria-expanded', 'false');
 
-        const links = [];
-        if (r.latest.url)
-          links.push(
-            `<a href="${r.latest.url}" target="_blank" rel="noopener">release</a>`
-          );
-        if (r.latest.download)
-          links.push(
-            `<a href="${r.latest.download}" target="_blank" rel="noopener">download</a>`
-          );
-        if (r.latest.notes) links.push(`<span title="${r.latest.notes}">notes</span>`);
-
-        const ver = display.version(r.latest.version);
-        const codeDisplay = display.codeText(r.latest.code);
-        const codeCopy = display.codeValue(r.latest.code);
+        const versionDisplay = escapeHtml(r.meta.versionText);
+        const codeDisplay = escapeHtml(r.meta.codeLabel);
+        const codeValue = r.meta.code === null ? '' : r.meta.code;
+        const dateDisplay = escapeHtml(r.meta.dateDisplay);
+        const dateTitle = escapeAttribute(r.meta.dateTitle);
+        const linkHtml = buildLinksHtml(r);
+        const trackBadge = `<span class="pill ${r.track === 'beta' ? 'beta' : 'ok'}">${escapeHtml(r.track)}</span>`;
+        const endpointVal = `?format=code&app=${encodeURIComponent(r.app.id)}`;
 
         li.innerHTML = `
           <div class="m-top">
-            <div class="m-name">${r.app.name || r.app.id}</div>
-            <div class="m-meta"><span class="m-ver">${ver}</span><span class="m-code">${codeDisplay}</span></div>
+            <div class="m-name">${escapeHtml(r.app.name || r.app.id)}</div>
+            <div class="m-meta"><span class="m-ver">${versionDisplay}</span><span class="m-code">${codeDisplay}</span></div>
             <button class="chev" aria-label="Toggle details">${chevronSVG()}</button>
           </div>
 
           <div class="m-details">
             <div class="m-divider"></div>
             <div class="m-grid">
-              <div class="m-label">Track</div><div><span class="pill ${r.track === 'beta' ? 'beta' : 'ok'}">${r.track}</span></div>
-              <div class="m-label">App ID</div><div class="mono">${r.app.id}</div>
-              <div class="m-label">Date</div><div>${r.latest.date ?? '—'}</div>
-              <div class="m-label">Links</div><div class="links">${links.join(' · ') || '—'}</div>
+              <div class="m-label">Track</div><div>${trackBadge}</div>
+              <div class="m-label">App ID</div><div class="mono">${escapeHtml(r.app.id)}</div>
+              <div class="m-label">Date</div><div title="${dateTitle}">${dateDisplay}</div>
+              <div class="m-label">Status</div><div class="status-cell">${renderStatusBadges(r.meta)}</div>
+              <div class="m-label">Links</div><div class="links">${linkHtml}</div>
             </div>
             <div class="m-actions">
-              <button class="btn-mini" data-copy="code" data-val="${codeCopy}">Copy code</button>
-              <button class="btn-mini" data-copy="endpoint" data-val="?format=code&app=${r.app.id}">Copy endpoint</button>
-              <a class="btn-mini" href="?format=json&app=${r.app.id}" target="_blank" rel="noopener">Open JSON</a>
+              <button class="btn-mini" data-copy="code" data-val="${codeValue}">Copy code</button>
+              <button class="btn-mini" data-copy="endpoint" data-val="${escapeAttribute(endpointVal)}">Copy endpoint</button>
+              <a class="btn-mini" href="?format=json&app=${encodeURIComponent(r.app.id)}" target="_blank" rel="noopener">Open JSON</a>
             </div>
           </div>
         `;
@@ -348,13 +1033,15 @@ download=${L.download ?? ''}\n`;
     function buildPicker(appIds) {
       if (!picker) return;
       pickerList.innerHTML = '';
+      const previous = picker.dataset.value;
+      let fallback = null;
       appIds.forEach(({ id, name }) => {
         const li = document.createElement('li');
         li.className = 'picker-item';
         li.tabIndex = 0;
         li.setAttribute('role', 'option');
         li.dataset.value = id;
-        li.innerHTML = `<span>${name || id}</span> <small>(${id})</small>`;
+        li.innerHTML = `<span>${escapeHtml(name || id)}</span> <small>(${escapeHtml(id)})</small>`;
         const choose = () => {
           setPicker(id, name || id);
           closePicker();
@@ -365,9 +1052,10 @@ download=${L.download ?? ''}\n`;
           if (e.key === 'Enter') choose();
         });
         pickerList.appendChild(li);
+        if (previous && previous === id) fallback = { id, name };
       });
-      const first = appIds[0];
-      if (first) setPicker(first.id, first.name || first.id);
+      const target = fallback || appIds[0];
+      if (target) setPicker(target.id, target.name || target.id);
     }
     function setPicker(id, label) {
       if (!picker) return;
@@ -500,7 +1188,7 @@ download=${L.download ?? ''}\n`;
       URL.revokeObjectURL(a.href);
     });
 
-    function build() {
+    function build(mode) {
       const rows = applyFilters(toRows());
       renderTable(rows);
       renderMobile(rows);
@@ -515,20 +1203,140 @@ download=${L.download ?? ''}\n`;
         }
       }
       if (uniq.length === 0) {
-        const all = (data.apps || []).map((a) => ({ id: a.id, name: a.name }));
-        buildPicker(all);
+        buildPicker(baseRows.apps);
       } else {
         buildPicker(uniq);
       }
 
       updateEndpointBoxes();
       if (picker?.getAttribute('aria-expanded') === 'true') pickerBtn.click();
+      updateSummaryMetrics(rows);
+      showNotice(composeNoticeMessages(rows, mode === 'init'));
     }
 
-    qInput?.addEventListener('input', build);
-    trackSel?.addEventListener('change', build);
-    sortSel?.addEventListener('change', build);
-    build();
+    function updateSummaryMetrics(rows) {
+      const summary = summariseRows(rows);
+      if (metrics.visible) metrics.visible.textContent = String(summary.total);
+      if (metrics.issues) metrics.issues.textContent = String(summary.issues);
+      if (metrics.stale) metrics.stale.textContent = String(summary.stale);
+      if (metrics.healthy) metrics.healthy.textContent = String(summary.healthy);
+    }
+
+    function composeNoticeMessages(rows, includeDatasetWarning) {
+      const messages = [];
+      if (Array.isArray(runtimeInfo.messages)) {
+        runtimeInfo.messages.forEach((msg) => {
+          if (msg && msg.text) messages.push(msg);
+        });
+      }
+      if (includeDatasetWarning && baseRows.warnings.length) {
+        messages.push({
+          type: 'warn',
+          text: `${baseRows.warnings.length} data warning${baseRows.warnings.length === 1 ? '' : 's'} listed below.`
+        });
+      }
+      if (!rows.length) {
+        messages.push({
+          type: 'info',
+          text: 'No rows match the current filters.'
+        });
+      }
+      return messages;
+    }
+
+    function showNotice(messages) {
+      if (!noticeEl) return;
+      if (!messages || !messages.length) {
+        noticeEl.hidden = true;
+        noticeEl.className = 'notice';
+        noticeEl.textContent = '';
+        return;
+      }
+      const priority = { error: 0, warn: 1, warning: 1, success: 2, info: 3 };
+      const sorted = messages.slice().sort(
+        (a, b) => (priority[a.type] ?? 3) - (priority[b.type] ?? 3)
+      );
+      const highest = sorted[0] || { type: 'info' };
+      const cls =
+        highest.type === 'error'
+          ? 'notice error'
+          : highest.type === 'warn' || highest.type === 'warning'
+          ? 'notice warn'
+          : highest.type === 'success'
+          ? 'notice success'
+          : 'notice info';
+      noticeEl.className = cls;
+      noticeEl.textContent = sorted.map((m) => m.text).join(' | ');
+      noticeEl.hidden = false;
+    }
+
+    function showDiagnostics(list) {
+      if (!diagnosticsEl || !diagnosticsListEl) return;
+      diagnosticsListEl.innerHTML = '';
+      if (!list || !list.length) {
+        diagnosticsEl.hidden = true;
+        return;
+      }
+      const frag = document.createDocumentFragment();
+      list.forEach((entry) => {
+        const li = document.createElement('li');
+        li.textContent = entry;
+        frag.appendChild(li);
+      });
+      diagnosticsListEl.innerHTML = '';
+      diagnosticsListEl.appendChild(frag);
+      diagnosticsEl.hidden = false;
+    }
+
+    qInput?.addEventListener('input', () => {
+      state.q = qInput.value || '';
+      persistState();
+      build();
+    });
+    trackSel?.addEventListener('change', () => {
+      state.track = normalizeTrackValue(trackSel.value);
+      applyStateToControls();
+      persistState();
+      build();
+    });
+    sortSel?.addEventListener('change', () => {
+      state.sort = normalizeSortValue(sortSel.value);
+      applyStateToControls();
+      persistState();
+      build();
+    });
+    toggleIssues?.addEventListener('change', () => {
+      state.toggles.issues = !!toggleIssues.checked;
+      persistState();
+      build();
+    });
+    toggleStale?.addEventListener('change', () => {
+      state.toggles.stale = !!toggleStale.checked;
+      persistState();
+      build();
+    });
+    toggleMissing?.addEventListener('change', () => {
+      state.toggles.missing = !!toggleMissing.checked;
+      persistState();
+      build();
+    });
+    toggleFuture?.addEventListener('change', () => {
+      state.toggles.future = !!toggleFuture.checked;
+      persistState();
+      build();
+    });
+    resetFiltersBtn?.addEventListener('click', () => {
+      const reset = normalizeState(DEFAULT_FILTER_STATE);
+      state.q = reset.q;
+      state.track = reset.track;
+      state.sort = reset.sort;
+      state.toggles = reset.toggles;
+      applyStateToControls();
+      persistState();
+      build();
+    });
+    build('init');
+    persistState(true);
 
     /* ----------------- bottom bar ----------------- */
     const nav = $('#mobile-nav');
@@ -814,9 +1622,10 @@ download=${L.download ?? ''}\n`;
 
   /* ----------------------- boot ----------------------- */
   (async function boot() {
-    const data = await loadData();
+    const runtime = {};
+    const data = await loadData(runtime);
     if (handleMachineEndpoints(data)) return;
-    initInteractive(data);
+    initInteractive(data, runtime);
   })();
 })();
 

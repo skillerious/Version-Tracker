@@ -176,7 +176,14 @@ body{
 .btn:active{transform:translateY(1px)}
 .btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 .btn.ok{background:linear-gradient(180deg,#13281c,#0f1a13);border-color:rgba(66,211,146,.36)}
-.btn.ghost{background:transparent}
+.btn.ghost{
+  background:transparent;
+  color:var(--dim);
+}
+.btn.ghost:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+}
 
 /* ===== Endpoints panel ===== */
 .endpoints{
@@ -248,11 +255,222 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--ring);font-size:12px}
 .pill.ok{background:rgba(66,211,146,.12);color:#cfeedd;border-color:rgba(66,211,146,.28)}
 .pill.beta{background:rgba(116,195,255,.12);color:#d8ecff;border-color:rgba(116,195,255,.28)}
-#apps-table th.col-app{width:26%}
-#apps-table th.col-track{width:12%}
+#apps-table th.col-app{width:20%}
+#apps-table th.col-id{width:12%}
+#apps-table th.col-track{width:10%}
 #apps-table th.col-version{width:12%}
-#apps-table th.col-code{width:12%}
-#apps-table th.col-date{width:16%}
+#apps-table th.col-code{width:10%}
+#apps-table th.col-date{width:12%}
+#apps-table th.col-status{width:14%}
+#apps-table th.col-links{width:10%}
+
+.notice{
+  margin-bottom:18px;
+  padding:12px 16px;
+  border-radius:14px;
+  border:1px solid var(--ring);
+  border-left-width:4px;
+  background:linear-gradient(180deg,var(--panel),var(--panel2));
+  color:var(--text);
+  font-size:14px;
+  line-height:1.5;
+}
+.notice[hidden]{display:none!important}
+.notice.info{border-left-color:var(--accent)}
+.notice.warn{border-left-color:var(--warn)}
+.notice.error{border-left-color:#ff6b6b}
+.notice.success{border-left-color:var(--ok)}
+
+.diagnostics{
+  margin:16px 0 24px;
+  padding:14px 16px;
+  border-radius:14px;
+  border:1px solid var(--ring);
+  background:linear-gradient(180deg,var(--panel),var(--panel2));
+  color:var(--text);
+}
+.diagnostics[hidden]{display:none!important}
+.diagnostics-title{
+  font-size:13px;
+  text-transform:uppercase;
+  letter-spacing:.4px;
+  color:var(--warn);
+  margin-bottom:8px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.diagnostics-list{
+  margin:0;
+  padding-left:16px;
+  display:grid;
+  gap:4px;
+  font-size:13px;
+  color:var(--dim);
+}
+.diagnostics-list li::marker{color:var(--warn)}
+
+.health{
+  margin:22px 0;
+  background:linear-gradient(180deg,var(--panel),var(--panel2));
+  border:1px solid var(--ring);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:18px;
+  display:grid;
+  gap:18px;
+}
+.health-summary{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:14px;
+}
+.metric{
+  border-radius:14px;
+  border:1px solid var(--ring);
+  background:rgba(255,255,255,.03);
+  padding:12px 14px;
+  display:grid;
+  gap:6px;
+}
+.metric-label{
+  color:var(--dim);
+  font-size:12px;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+}
+.metric-value{
+  font-size:20px;
+  font-weight:700;
+  color:var(--text);
+}
+.metric.warn .metric-value{color:var(--warn)}
+.metric.stale .metric-value{color:#ffce7a}
+.metric.ok .metric-value{color:var(--ok)}
+
+.health-controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+}
+.chip-toggle{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  padding:4px 12px;
+  gap:8px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--ring);
+  border-radius:999px;
+  font-size:13px;
+  color:var(--dim);
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.chip-toggle:hover{
+  border-color:var(--ring-2);
+  color:var(--text);
+}
+.chip-toggle input{
+  position:absolute;
+  width:0;
+  height:0;
+  opacity:0;
+}
+.chip-toggle span{
+  pointer-events:none;
+}
+.chip-toggle:has(input:checked){
+  background:rgba(92,225,255,.12);
+  border-color:var(--accent);
+  color:var(--accent);
+  box-shadow:0 0 0 1px rgba(92,225,255,.12);
+}
+.chip-toggle:has(input:checked) span{font-weight:600}
+
+.status-cell{
+  min-width:140px;
+}
+.status-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.status-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:3px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.08);
+  font-size:12px;
+  color:var(--dim);
+  background:rgba(255,255,255,.03);
+  white-space:nowrap;
+}
+.status-pill.warn{
+  background:rgba(250,186,74,.16);
+  border-color:rgba(250,186,74,.32);
+  color:#ffe0a6;
+}
+.status-pill.error{
+  background:rgba(255,107,107,.16);
+  border-color:rgba(255,107,107,.36);
+  color:#ffd4d4;
+}
+.status-pill.info{
+  background:rgba(92,225,255,.14);
+  border-color:rgba(92,225,255,.32);
+  color:#c9f4ff;
+}
+.status-pill.ok{
+  background:rgba(66,211,146,.12);
+  border-color:rgba(66,211,146,.28);
+  color:#d1f5e5;
+}
+
+tbody tr.row-warn td{background:rgba(250,186,74,.06)}
+tbody tr.row-error td{background:rgba(255,107,107,.08)}
+tbody tr.row-info td{background:rgba(92,225,255,.05)}
+tbody tr.row-warn:hover td{background:rgba(250,186,74,.12)}
+tbody tr.row-error:hover td{background:rgba(255,107,107,.13)}
+tbody tr.row-info:hover td{background:rgba(92,225,255,.12)}
+
+.m-grid .status-list{justify-content:flex-start}
+.m-status-label{
+  font-size:12px;
+  color:var(--dim);
+  text-transform:uppercase;
+  letter-spacing:.4px;
+}
+.m-item.row-warn{border-color:rgba(250,186,74,.4)}
+.m-item.row-error{border-color:rgba(255,107,107,.45)}
+.m-item.row-info{border-color:rgba(92,225,255,.32)}
+.m-item.row-warn .m-divider{background:rgba(250,186,74,.3)}
+.m-item.row-error .m-divider{background:rgba(255,107,107,.35)}
+.m-item.row-info .m-divider{background:rgba(92,225,255,.28)}
+
+@media (max-width:820px){
+  .health{
+    padding:16px;
+  }
+  .health-summary{
+    grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  }
+}
+@media (max-width:620px){
+  .health{
+    gap:16px;
+  }
+  .health-controls{
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .chip-toggle{
+    justify-content:center;
+  }
+}
 
 /* ===== Mobile LIST ===== */
 .m-list{ display:none; width:100%; padding:0; margin:0; list-style:none; }
