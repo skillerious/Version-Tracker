@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-11-08T19:13:42Z",
+  "generated": "2025-11-08T19:15:01Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -241,6 +241,14 @@
           "url": "",
           "download": "",
           "notes": ""
+        },
+        "beta": {
+          "version": "1.0.0",
+          "code": 10206,
+          "date": "2025-11-08",
+          "url": "https://github.com/skillerious/Markiva",
+          "download": "https://github.com/skillerious/Markiva/releases",
+          "notes": "We’re back with Markiva v3.1, a feature-packed update that improves usability, layout flexibility, and introduces smart GitHub integration. Here’s what’s new in this exciting release!"
         }
       },
       "history": [
