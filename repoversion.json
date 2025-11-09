@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-11-09T16:53:39Z",
+  "generated": "2025-11-09T18:42:22Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -8,8 +8,8 @@
       "name": "VersionTrackerEditor",
       "tracks": {
         "stable": {
-          "version": "2.6.1",
-          "code": 206011,
+          "version": "2.6.2",
+          "code": 206012,
           "date": "2025-11-08",
           "url": "https://github.com/skillerious/Version-Tracker-Editor",
           "download": "https://github.com/skillerious/Version-Tracker-Editor/releases",
@@ -19,7 +19,7 @@
       "history": [
         {
           "version": "2.6.2",
-          "code": 206011,
+          "code": 206012,
           "date": "2025-11-08",
           "url": "https://github.com/skillerious/Version-Tracker-Editor"
         },
