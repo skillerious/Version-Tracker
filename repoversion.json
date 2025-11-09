@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-11-09T19:06:16Z",
+  "generated": "2025-11-09T19:16:24Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -11,8 +11,8 @@
           "version": "2.6.1",
           "code": 206011,
           "date": "2025-11-08",
-          "url": "https://github.com/skillerious/Version-Tracker-Editor",
-          "download": "https://github.com/skillerious/Version-Tracker-Editor/releases",
+          "url": "https://github.com/skillerious/Version-Tracker-Editor/releases",
+          "download": "https://github.com/skillerious/Version-Tracker-Editor/releases/download/v2.6.1/Version.Tracker.Editor.exe",
           "notes": "What is new in this version.\n* New update logic\n* General bug fixes\n* Performace Enhancements"
         }
       },
@@ -27,7 +27,7 @@
           "version": "2.6.1",
           "code": 206011,
           "date": "2025-11-08",
-          "url": "https://github.com/skillerious/Version-Tracker-Editor"
+          "url": "https://github.com/skillerious/Version-Tracker-Editor/releases"
         },
         {
           "version": "1.0.1",
