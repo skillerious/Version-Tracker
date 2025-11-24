@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generated": "2025-11-09T23:03:28Z",
+  "generated": "2025-11-24T23:08:23Z",
   "contact": "Skillerious — Robin Doak",
   "apps": [
     {
@@ -430,15 +430,21 @@
       "name": "TornTargetTracker",
       "tracks": {
         "stable": {
-          "version": "2.6.4",
-          "code": 206040,
-          "date": "2025-11-01",
-          "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.6.1",
-          "download": "https://github.com/skillerious/TornTargetTracker/releases/download/V2.6.1/Target.Tracker.Installer.exe",
-          "notes": ""
+          "version": "2.8.1",
+          "code": 208010,
+          "date": "2025-11-24",
+          "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.8.1",
+          "download": "https://github.com/skillerious/TornTargetTracker/releases/download/V2.8.1/TargetTracker-v2.8.1-Setup.exe",
+          "notes": "This version delivers critical security hardening, major stability fixes, and quality-of-life improvements."
         }
       },
       "history": [
+        {
+          "version": "2.8.1",
+          "code": 208010,
+          "date": "2025-11-24",
+          "url": "https://github.com/skillerious/TornTargetTracker/releases/tag/V2.8.1"
+        },
         {
           "version": "2.6.4",
           "code": 206040,
